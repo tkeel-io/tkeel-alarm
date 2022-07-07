@@ -1,0 +1,58 @@
+server:
+  port: 7878 # 服务绑定的端口，不写默认是8080
+
+spring:
+  application:
+    name: tkeel-alarm #服务名
+    #配置数据源,yml格式
+  datasource:
+    url: jdbc:mysql://192.168.100.5:32463/tkeel-alarm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: a3fks=ixmeb82a
+    driver-class-name: com.mysql.jdbc.Driver
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+config2:
+    version: v0.0.1
+
+#指定mybatis映射文件的地址
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#日志配置
+logging:
+    config: classpath:log4j2-spring.xml
+
+#分页配置
+pagehelper:
+  autoRuntimeDialect: true
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+ok:
+  http:
+    connect-timeout: 30
+    read-timeout: 30
+    write-timeout: 30
+    max-idle-connections: 200
+    keep-alive-duration: 300
+
+#恩菲webhook地址
+webhook:
+  url: http://10.10.7.51:31400/message/iot/webhook/receive
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 暴露监控接口，*为全部接口
+        include: '*'
+        exclude: 'metrics'
+      base-path: /

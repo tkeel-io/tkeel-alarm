@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alarm.tkeel.dao.MailMapper">
+    <insert id="insertMail" parameterType="com.alarm.tkeel.pojo.mail.Email">
+        insert into tkeel_alarm_mail_config(id,smtp_address,port,`ssl`,smtp_user_name,smtp_pass_word,from_address) values (#{id},#{smtpAddress},#{port},#{ssl},#{smtpUserName},#{smtpPassWord},#{fromAddress})
+    </insert>
+
+    <update id="updateMailConfig" parameterType="com.alarm.tkeel.pojo.mail.Email" >
+        update tkeel_alarm_mail_config
+        <set>
+            <trim suffixOverrides=",">
+                <if test="smtpAddress != null">
+                    smtp_address = #{smtpAddress},
+                </if>
+                <if test="port != null">
+                    port = #{port},
+                </if>
+                <if test="smtpAddress != null">
+                    `ssl` = #{ssl},
+                </if>
+                <if test="smtpUserName != null">
+                    smtp_user_name = #{smtpUserName},
+                </if>
+                <if test="smtpPassWord != null">
+                    smtp_pass_word = #{smtpPassWord},
+                </if>
+                <if test="fromAddress != null">
+                    from_address = #{fromAddress},
+                </if>
+            </trim>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="queryMailConfig" resultType="com.alarm.tkeel.pojo.mail.Email">
+        SELECT * from tkeel_alarm_mail_config
+    </select>
+
+    <select id="queryNoticeGroupList"  parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup" resultType="com.alarm.tkeel.pojo.mail.NoticeGroup">
+        SELECT * from tkeel_alarm_notice where deleted = 0 and  tenant_id = #{tenantId}
+        <if test="groupName != null and groupName != ''">
+            and group_name like '%${groupName}%'
+        </if>
+        order by  create_time desc
+    </select>
+
+    <select id="queryNoticeGroupByIds"  parameterType="java.util.List" resultType="com.alarm.tkeel.pojo.mail.NoticeGroup">
+        SELECT * from tkeel_alarm_notice where deleted = 0 and  notice_id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        order by  create_time desc
+    </select>
+
+    <insert id="createNoticeGroup" parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup">
+        insert into tkeel_alarm_notice(notice_id,tenant_id,group_name,notice_desc) values (#{noticeId},#{tenantId},#{groupName},#{noticeDesc})
+    </insert>
+
+    <update id="updateEmailAddress" parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup" >
+        update tkeel_alarm_notice
+        <set>
+            <trim suffixOverrides=",">
+                <if test="emailAddress != null">
+                    email_address = #{emailAddress},
+                </if>
+                <if test="groupName != null">
+                    group_name = #{groupName},
+                </if>
+                <if test="noticeDesc != null">
+                    notice_desc = #{noticeDesc},
+                </if>
+            </trim>
+        </set>
+        where deleted = 0 and notice_id = #{noticeId}
+    </update>
+
+    <update id="deleteNoticeGroup" parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup" >
+        update tkeel_alarm_notice
+        <set>
+            <trim suffixOverrides=",">
+                <if test="deleted != null">
+                    deleted = #{deleted},
+                </if>
+            </trim>
+        </set>
+        where notice_id = #{noticeId}
+    </update>
+
+
+</mapper>
