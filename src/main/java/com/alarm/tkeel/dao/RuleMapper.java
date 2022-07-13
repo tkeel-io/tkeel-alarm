@@ -55,4 +55,6 @@ public interface RuleMapper {
 
     List<RuleId> queryRuleIdByTelemetryId(TelemetryStatus telemetryStatus);
 
+    List<Rule> queryRuleStatus(String tenantId);
+
 }

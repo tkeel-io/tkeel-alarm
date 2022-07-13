@@ -13,6 +13,8 @@ import java.io.Serializable;
 public class Desc implements Serializable {
     private Long ruleId;
     private String tenantId;
+    private String tempId;
+    private String deviceId;
     private String telemetryId;
     private String telemetryName;
     private Integer telemetryType;

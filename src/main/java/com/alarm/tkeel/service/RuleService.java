@@ -45,4 +45,6 @@ public interface RuleService {
     int updateTelemetryStatusByRuleId(TelemetryStatus telemetryStatus);
 
     List<RuleId> queryRuleIdByTelemetryId(TelemetryStatus telemetryStatus);
+
+    List<Rule> queryRuleStatus(String tenantId);
 }

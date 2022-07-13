@@ -10,9 +10,10 @@ import java.io.Serializable;
  * @Date 2022/06/01/14:58
  */
 @Data
-public class EmailAddress implements Serializable {
+public class EmailAddressVo implements Serializable {
     private Long id;
     private Long noticeId;
     private String userName;
     private String emailAddress;
+    private Integer deleted;
 }

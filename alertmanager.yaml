@@ -1,6 +1,6 @@
 --- !com.alarm.tkeel.crd.alertmanager.AlertEntity
 global: !com.alarm.tkeel.crd.alertmanager.Global
-  resolve_timeout: 10m
+  resolve_timeout: 5m
   smtp_auth_password: cjdxTX.9Ppfp8Fs
   smtp_auth_username: lunzhou
   smtp_from: lunzhou@yunify.com
@@ -8,25 +8,10 @@ global: !com.alarm.tkeel.crd.alertmanager.Global
 receivers: 
   - !com.alarm.tkeel.crd.alertmanager.Receiver
     name: default
-  - !com.alarm.tkeel.crd.alertmanager.Receiver
-    email_configs: 
-      - !com.alarm.tkeel.crd.alertmanager.EmailConfig
-        send_resolved: true
-        to: "lunz1207@gmial.com,lunzhou@yunify.com"
-    name: "10002"
-    webhook_configs: 
-      - !com.alarm.tkeel.crd.alertmanager.WebhookConfig
-        send_resolved: true
-        url: "http://tkeel-alarm.keel-system:31239/webhook/demo"
 route: !com.alarm.tkeel.crd.alertmanager.Route
   group_by: !java.lang.String[]
     - ruleId
-  group_wait: 20s
+  group_interval: 10s
+  group_wait: 10s
   receiver: default
-  repeat_interval: 20s
-  routes: 
-    - !com.alarm.tkeel.crd.alertmanager.Routes
-      match: 
-        tenantId: qVFDErdg
-        ruleId: "10002"
-      receiver: "10002"
+  repeat_interval: 1m

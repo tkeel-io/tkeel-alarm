@@ -17,7 +17,10 @@ public class NotifyStatus extends TenantParam implements Serializable {
      * 模板（temp）、设备（device）、遥测（telemetry）
      */
     private String type;
-    private String objectId;
+//    private String objectId;
+    private String tempId;
+    private String deviceId;
+    private String telemetryId;
     /**
      * 0:未变更、1：删除、2：修改
      */

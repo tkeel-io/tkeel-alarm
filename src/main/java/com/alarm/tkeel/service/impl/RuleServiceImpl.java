@@ -255,6 +255,8 @@ public class RuleServiceImpl implements RuleService {
                     }
                 }
                 de.setTenantId(ruleParamVo.getTenantId());
+                de.setTempId(ruleParamVo.getTempId());
+                de.setDeviceId(ruleParamVo.getDeviceId());
                 de.setTelemetryId(deviceCondition.getTelemetryId());
                 de.setTelemetryName(deviceCondition.getTelemetryName());
                 de.setTelemetryType(deviceCondition.getTelemetryType());
@@ -296,6 +298,9 @@ public class RuleServiceImpl implements RuleService {
         if(ruleParamVo.getRuleId() != null){
             // 更新规则
             rule.setRuleId(ruleParamVo.getRuleId());
+            rule.setTempStatus(0);
+            rule.setDeviceStatus(0);
+            rule.setTelemetryStatus(0);
             ruleMapper.updateRule(rule);
             // 先删除之前的记录
             ruleMapper.deleteRuleDesc(ruleParamVo.getRuleId());
@@ -391,6 +396,11 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public List<RuleId> queryRuleIdByTelemetryId(TelemetryStatus telemetryStatus) {
         return ruleMapper.queryRuleIdByTelemetryId(telemetryStatus);
+    }
+
+    @Override
+    public List<Rule> queryRuleStatus(String tenantId) {
+        return ruleMapper.queryRuleStatus(tenantId);
     }
 
     /**

@@ -74,6 +74,8 @@ CREATE TABLE  if not exists `tkeel-alarm`.`tkeel_alarm_rule_desc` (
   `rule_id` bigint NOT NULL,
   `tenant_id` varchar(20) NOT NULL,
   `alarm_source_object` int NOT NULL COMMENT '0：平台，1：设备',
+  `temp_id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `device_id` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `telemetry_type` int DEFAULT NULL,
   `telemetry_id` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `telemetry_name` varchar(20) DEFAULT NULL,
@@ -86,7 +88,8 @@ CREATE TABLE  if not exists `tkeel-alarm`.`tkeel_alarm_rule_desc` (
   `deleted` int NOT NULL DEFAULT '0',
   `telemetry_status` int NOT NULL DEFAULT '0' COMMENT '0：未变更，1：删除，2：修改',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=959 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=972 DEFAULT CHARSET=utf8mb3;
+
 
 -- `tkeel-alarm`.tkeel_alarm_rule_platform definition
 
@@ -105,8 +108,19 @@ CREATE TABLE  if not exists `tkeel-alarm`.`tkeel_alarm_notice` (
   `tenant_id` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `group_name` varchar(30) NOT NULL,
   `notice_desc` varchar(100) NOT NULL,
-  `email_address` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '邮件地址，逗号隔开',
+--  `email_address` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '邮件地址，逗号隔开',
   `deleted` int NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`notice_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
+
+-- `tkeel-alarm`.tkeel_alarm_mail_address definition
+
+CREATE TABLE  if not exists `tkeel-alarm`.`tkeel_alarm_mail_address` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `notice_id` bigint NOT NULL,
+  `user_name` varchar(50) NOT NULL,
+  `email_address` varchar(100) NOT NULL,
+  `deleted` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2000 DEFAULT CHARSET=utf8mb3;

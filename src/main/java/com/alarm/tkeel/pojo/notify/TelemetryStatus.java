@@ -13,6 +13,8 @@ import java.util.List;
  */
 @Data
 public class TelemetryStatus extends TenantParam implements Serializable {
+    private String tempId;
+    private String deviceId;
     private List<Long> ruleId;
     private List<String> telemetryId;
     private Integer telemetryStatus;

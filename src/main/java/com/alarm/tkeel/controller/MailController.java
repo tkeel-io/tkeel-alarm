@@ -4,15 +4,15 @@ package com.alarm.tkeel.controller;
 import com.alarm.tkeel.dao.RuleMapper;
 import com.alarm.tkeel.pojo.mail.BindingQuery;
 import com.alarm.tkeel.pojo.mail.Email;
-import com.alarm.tkeel.pojo.mail.EmailAddress;
+import com.alarm.tkeel.pojo.mail.EmailAddressVo;
 import com.alarm.tkeel.pojo.mail.NoticeGroup;
 import com.alarm.tkeel.result.ResultData;
 import com.alarm.tkeel.service.MailService;
+import com.alarm.tkeel.utils.EmailSendUtils;
 import com.alarm.tkeel.utils.EncoderUtils;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.bouncycastle.cms.PasswordRecipientId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +31,7 @@ public class MailController {
     private EncoderUtils encoderUtils;
     @Autowired
     private RuleMapper ruleMapper;
+
 
     @PostMapping("/alarm/mailConfig")
     @ApiOperation(value = "邮箱配置",notes = "邮箱配置",produces = "application/json")
@@ -107,20 +108,20 @@ public class MailController {
         return ResultData.success(mailService.createNoticeGroup(noticeGroup));
     }
 
-    /**
-     * 更新通知对象组邮件信息
-     * @param noticeGroup
-     * @return
-     */
-    @PutMapping("/alarm/noticeGroup/update")
-    @ApiOperation(value = "更新通知对象组",notes = "更新通知对象组",produces = "application/json")
-    public ResultData updateNoticeGroup(@RequestBody NoticeGroup noticeGroup){
-        if(noticeGroup.getNoticeId() == null){
-            return ResultData.fail("io.tkeel.INTERNAL_ERROR","通知邮箱地址或id不能为空！");
-        }
-        log.debug(JSON.toJSONString(noticeGroup));
-        return ResultData.success(mailService.updateEmailAddress(noticeGroup));
-    }
+//    /**
+//     * 更新通知对象组邮件信息
+//     * @param noticeGroup
+//     * @return
+//     */
+//    @PutMapping("/alarm/noticeGroup/update")
+//    @ApiOperation(value = "更新通知对象组",notes = "更新通知对象组",produces = "application/json")
+//    public ResultData updateNoticeGroup(@RequestBody NoticeGroup noticeGroup){
+//        if(noticeGroup.getNoticeId() == null){
+//            return ResultData.fail("io.tkeel.INTERNAL_ERROR","通知邮箱地址或id不能为空！");
+//        }
+//        log.debug(JSON.toJSONString(noticeGroup));
+//        return ResultData.success(mailService.updateEmailAddress(noticeGroup));
+//    }
 
     /**
      * 删除通知对象组（假删）
@@ -171,5 +172,67 @@ public class MailController {
         return ResultData.success(map);
     }
 
+    @PostMapping("/alarm/email/test")
+    @ApiOperation(value = "测试邮件发送",notes = "测试邮件发送",produces = "application/json")
+    public ResultData testSendEmail(@RequestBody Email email){
+        if(email == null){
+            return ResultData.fail("io.tkeel.INTERNAL_ERROR","无效参数！");
+        }
+        EmailSendUtils emailSendUtils =new EmailSendUtils();
+        int code = emailSendUtils.sendWithText(email);
+        if(code > 0){
+            return ResultData.success(code);
+        }
+        return ResultData.fail("io.tkeel.ERROR","测试邮件服务器失败！");
+    }
+
+    @GetMapping("/alarm/email/query")
+    @ApiOperation(value = "根据通知ID查询邮箱地址信息",notes = "根据通知ID查询邮箱地址信息",produces = "application/json")
+    public ResultData queryAddressByNoticeId(@RequestParam(value = "noticeId",required = false) Long noticeId){
+        if(noticeId == null || noticeId.equals("")){
+            return ResultData.fail("io.tkeel.INTERNAL_ERROR","通知id参数不能为空！");
+        }
+        return ResultData.success(mailService.queryEmailAddressByNoticeId(noticeId));
+    }
+
+    @PostMapping("/alarm/email/create")
+    @ApiOperation(value = "新建邮件地址",notes = "新建邮件地址",produces = "application/json")
+    public ResultData createEmailAddress(@RequestBody EmailAddressVo emailAddressVo){
+        if(emailAddressVo.getNoticeId() == null || emailAddressVo.getEmailAddress() == null|| emailAddressVo.getUserName() == null){
+            return ResultData.fail("io.tkeel.INTERNAL_ERROR","无效参数！");
+        }
+        int code = mailService.createEmailAddress(emailAddressVo);
+        if(code > 0){
+            return ResultData.success(code);
+        }
+        return ResultData.fail("io.tkeel.ERROR","新增邮件地址失败！");
+    }
+
+    @PostMapping("/alarm/email/update")
+    @ApiOperation(value = "更新邮件地址",notes = "更新邮件地址",produces = "application/json")
+    public ResultData updateEmailAddress(@RequestBody EmailAddressVo emailAddressVo){
+        if(emailAddressVo.getId()== null){
+            return ResultData.fail("io.tkeel.INTERNAL_ERROR","ID不能为空！");
+        }
+        int code = mailService.updateEmailAddress(emailAddressVo);
+        if(code > 0){
+            return ResultData.success(code);
+        }
+        return ResultData.fail("io.tkeel.ERROR","更新邮件地址失败！");
+    }
+
+    @GetMapping("/alarm/email/queryCount")
+    @ApiOperation(value = "根据通知ID查询邮箱地址信息",notes = "根据通知ID查询邮箱地址信息",produces = "application/json")
+    public ResultData queryCount(@RequestHeader("x-tKeel-auth") String token){
+        System.out.println("/alarm/email/queryCount ====="+token);
+        if (token == null || token.equals("")){
+            return ResultData.fail("io.tkeel.INTERNAL_ERROR","token无效！");
+        }
+        if(encoderUtils.getTenantId(token).equals("")){
+            return ResultData.fail("io.tkeel.INTERNAL_ERROR","解析租户ID失败！");
+        }
+        String tenantId = encoderUtils.getTenantId(token);
+        return ResultData.success(mailService.queryNoticeCount(tenantId));
+    }
 
 }

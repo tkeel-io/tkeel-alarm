@@ -56,23 +56,23 @@
         insert into tkeel_alarm_notice(notice_id,tenant_id,group_name,notice_desc) values (#{noticeId},#{tenantId},#{groupName},#{noticeDesc})
     </insert>
 
-    <update id="updateEmailAddress" parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup" >
-        update tkeel_alarm_notice
-        <set>
-            <trim suffixOverrides=",">
-                <if test="emailAddress != null">
-                    email_address = #{emailAddress},
-                </if>
-                <if test="groupName != null">
-                    group_name = #{groupName},
-                </if>
-                <if test="noticeDesc != null">
-                    notice_desc = #{noticeDesc},
-                </if>
-            </trim>
-        </set>
-        where deleted = 0 and notice_id = #{noticeId}
-    </update>
+<!--    <update id="updateEmailAddress" parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup" >-->
+<!--        update tkeel_alarm_notice-->
+<!--        <set>-->
+<!--            <trim suffixOverrides=",">-->
+<!--                <if test="emailAddress != null">-->
+<!--                    email_address = #{emailAddress},-->
+<!--                </if>-->
+<!--                <if test="groupName != null">-->
+<!--                    group_name = #{groupName},-->
+<!--                </if>-->
+<!--                <if test="noticeDesc != null">-->
+<!--                    notice_desc = #{noticeDesc},-->
+<!--                </if>-->
+<!--            </trim>-->
+<!--        </set>-->
+<!--        where deleted = 0 and notice_id = #{noticeId}-->
+<!--    </update>-->
 
     <update id="deleteNoticeGroup" parameterType="com.alarm.tkeel.pojo.mail.NoticeGroup" >
         update tkeel_alarm_notice
@@ -86,5 +86,37 @@
         where notice_id = #{noticeId}
     </update>
 
+    <select id="queryEmailAddressByNoticeId" parameterType="java.lang.Long" resultType="com.alarm.tkeel.pojo.mail.EmailAddress">
+        SELECT * from tkeel_alarm_mail_address where  deleted = 0 and notice_id = #{noticeId}
+    </select>
+
+    <insert id="createEmailAddress" parameterType="com.alarm.tkeel.pojo.mail.EmailAddressVo">
+        insert into tkeel_alarm_mail_address(notice_id,user_name,email_address)
+        values (#{noticeId},#{userName},#{emailAddress})
+    </insert>
+
+    <update id="updateEmailAddress" parameterType="com.alarm.tkeel.pojo.mail.EmailAddressVo" >
+        update tkeel_alarm_mail_address
+        <set>
+            <trim suffixOverrides=",">
+                <if test="userName != null">
+                    user_name = #{userName},
+                </if>
+                <if test="emailAddress != null">
+                    email_address = #{emailAddress},
+                </if>
+                <if test="deleted != null">
+                    deleted = #{deleted},
+                </if>
+            </trim>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="queryNoticeCount" parameterType="java.lang.String" resultType="com.alarm.tkeel.pojo.mail.NoticeCount">
+        SELECT tan2.notice_id as notice_id ,COUNT(tama.notice_id) as `count` FROM  tkeel_alarm_notice tan2 inner join tkeel_alarm_mail_address tama on tan2.notice_id = tama.notice_id
+        WHERE tan2.deleted = 0 AND  tan2.tenant_id = #{tenantId} AND  tama.deleted  = 0
+        group BY tan2.notice_id
+    </select>
 
 </mapper>

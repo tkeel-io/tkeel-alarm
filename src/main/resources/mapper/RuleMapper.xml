@@ -24,7 +24,7 @@
         <if test="ruleName != null and ruleName != ''">
             and rule_name like '%${ruleName}%'
         </if>
-        order by create_time desc
+        order by temp_status desc ,device_status desc,telemetry_status desc,create_time desc
     </select>
 
     <select id="queryRuleById" parameterType="java.lang.Long" resultType="com.alarm.tkeel.pojo.rules.Rule">
@@ -131,6 +131,15 @@
                 <if test="noticeId != null">
                     notice_id = #{noticeId},
                 </if>
+                <if test="tempStatus != null">
+                    temp_status = #{tempStatus},
+                </if>
+                <if test="deviceStatus != null">
+                    device_status = #{deviceStatus},
+                </if>
+                <if test="telemetryStatus != null">
+                    telemetry_status = #{telemetryStatus},
+                </if>
             </trim>
         </set>
         where rule_id = #{ruleId}
@@ -139,10 +148,10 @@
     <insert id="insertRuleDesc" parameterType="java.util.List">
         insert into
         tkeel_alarm_rule_desc
-        (rule_id,tenant_id,telemetry_type,telemetry_id,alarm_source_object,telemetry_name,time,polymerize,operator,`label`,value,plat_rule_id)
+        (rule_id,tenant_id,temp_id,device_id,telemetry_type,telemetry_id,alarm_source_object,telemetry_name,time,polymerize,operator,`label`,value,plat_rule_id)
         values
         <foreach collection ="list" item="desc" separator =",">
-            (#{desc.ruleId},#{desc.tenantId},#{desc.telemetryType},#{desc.telemetryId},#{desc.alarmSourceObject},#{desc.telemetryName},#{desc.time},#{desc.polymerize},#{desc.operator},#{desc.label},#{desc.value},#{desc.platRuleId})
+            (#{desc.ruleId},#{desc.tenantId},#{desc.tempId},#{desc.deviceId},#{desc.telemetryType},#{desc.telemetryId},#{desc.alarmSourceObject},#{desc.telemetryName},#{desc.time},#{desc.polymerize},#{desc.operator},#{desc.label},#{desc.value},#{desc.platRuleId})
         </foreach >
     </insert>
 
@@ -221,10 +230,21 @@
     </update>
 
     <select id="queryRuleIdByTelemetryId" resultType="com.alarm.tkeel.pojo.notify.RuleId" parameterType="com.alarm.tkeel.pojo.notify.TelemetryStatus">
-        select rule_id from tkeel_alarm_rule_desc where deleted = 0 and tenant_id = #{tenantId} and telemetry_id in
+        select rule_id from tkeel_alarm_rule_desc where deleted = 0 and tenant_id = #{tenantId}
+        <if test="tempId != null">
+            and temp_id = #{tempId}
+        </if>
+        <if test="deviceId != null">
+            and device_id = #{deviceId}
+        </if>
+        and  telemetry_id in
         <foreach collection="telemetryId" item="item" index="index" open="(" separator="," close=")">
             "${item}"
         </foreach>
+    </select>
+
+    <select id="queryRuleStatus"  parameterType="java.lang.String" resultType="com.alarm.tkeel.pojo.rules.Rule">
+        select * from tkeel_alarm_rule where deleted = 0 and tenant_id = #{tenantId} and (temp_status > 0 OR device_status > 0 OR telemetry_status > 0)
     </select>
 
 </mapper>

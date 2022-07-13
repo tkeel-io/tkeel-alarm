@@ -21,4 +21,8 @@ public class Email implements Serializable {
     private String smtpUserName;
     private String smtpPassWord;
     private String fromAddress;
+    /**
+     * 收件人地址，用于邮件服务器测试
+     */
+    private String to;
 }

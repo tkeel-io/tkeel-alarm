@@ -34,8 +34,8 @@ public class ResultData<T> {
 
     public static <T> ResultData<T> fail(String code, String message) {
         ResultData<T> resultData = new ResultData<>();
-        resultData.setCode(code);
-        resultData.setMsg(message);
+        resultData.setCode(ReturnCode.TKEEL500.getCode());
+        resultData.setMsg(ReturnCode.TKEEL500.getMessage());
         return resultData;
     }
 }
