@@ -2,7 +2,6 @@ package com.alarm.tkeel.pojo;
 
 import lombok.Data;
 
-import javax.xml.soap.SAAJResult;
 import java.io.Serializable;
 
 /**

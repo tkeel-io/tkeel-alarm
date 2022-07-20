@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alarm.tkeel.dao.RuleMapper">
+    <select id="queryRuleList" parameterType="com.alarm.tkeel.pojo.rules.RuleParamVo" resultType="com.alarm.tkeel.pojo.rules.Rule">
+        SELECT * from tkeel_alarm_rule where deleted = 0
+        <if test="ruleId != null">
+            and rule_id = #{ruleId}
+        </if>
+        <if test="tenantId != null">
+            and tenant_id = #{tenantId}
+        </if>
+        <if test="alarmLevel != null">
+            and alarm_level = #{alarmLevel}
+        </if>
+        <if test="alarmType != null">
+            and alarm_type = #{alarmType}
+        </if>
+        <if test="enable != null">
+            and enable = #{enable}
+        </if>
+        <if test="alarmRuleType != null">
+            and alarm_rule_type = #{alarmRuleType}
+        </if>
+        <if test="ruleName != null and ruleName != ''">
+            and rule_name like '%${ruleName}%'
+        </if>
+        order by temp_status desc ,device_status desc,telemetry_status desc,create_time desc
+    </select>
+
+    <select id="queryRuleById" parameterType="java.lang.Long" resultType="com.alarm.tkeel.pojo.rules.Rule">
+        SELECT * from tkeel_alarm_rule where rule_id = #{ruleId}
+    </select>
+
+    <select id="queryRuleByCRD" parameterType="java.lang.Long" resultType="com.alarm.tkeel.pojo.rules.RuleParamVo">
+        SELECT * from tkeel_alarm_rule where rule_id = #{ruleId}
+    </select>
+
+    <select id="queryCountByTempId" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT count(0) from tkeel_alarm_rule where temp_id = #{tempId} and deleted = 0
+    </select>
+
+
+
+    <select id="queryPlatformRuleList" resultType="com.alarm.tkeel.pojo.rules.PlatformRule">
+        SELECT * from tkeel_alarm_rule_platform
+    </select>
+
+    <update id="setNotice" parameterType="com.alarm.tkeel.pojo.rules.UpdateNoticeParamVo" >
+        update tkeel_alarm_rule
+        <set>
+            notice_id = #{noticeId}
+        </set>
+        where deleted = 0 and rule_id = #{ruleId}
+    </update>
+
+    <update id="setEnable" parameterType="com.alarm.tkeel.pojo.rules.EnableParamVo" >
+        update tkeel_alarm_rule
+        <set>
+            <trim suffixOverrides=",">
+                <if test="enable != null">
+                    enable = #{enable},
+                </if>
+            </trim>
+        </set>
+        where deleted = 0 and rule_id = #{ruleId}
+    </update>
+
+    <update id="deleteRule" parameterType="com.alarm.tkeel.pojo.rules.DeleteParamVo" >
+        update tkeel_alarm_rule
+        <set>
+            <trim suffixOverrides=",">
+                <if test="deleted != null">
+                    deleted = #{deleted},
+                </if>
+            </trim>
+        </set>
+        where rule_id = #{ruleId}
+    </update>
+
+    <insert id="createRule" useGeneratedKeys="true" keyProperty="ruleId" keyColumn = "rule_id"  parameterType="com.alarm.tkeel.pojo.rules.Rule">
+        insert into
+        tkeel_alarm_rule
+        (tenant_id,rule_name,alarm_type,alarm_rule_type,alarm_level,alarm_source_object,temp_id,temp_name,device_id,device_name,telemetry_id,`condition`,prom_ql,rule_desc,notice_id)
+        values
+        (#{tenantId},#{ruleName},#{alarmType},#{alarmRuleType},#{alarmLevel},#{alarmSourceObject},#{tempId},#{tempName},#{deviceId},#{deviceName},#{telemetryId},#{condition},#{promQl},#{ruleDesc},#{noticeId})
+    </insert>
+
+    <update id="updateRule"  parameterType="com.alarm.tkeel.pojo.rules.Rule">
+        update tkeel_alarm_rule
+        <set>
+            <trim suffixOverrides=",">
+                <if test="tenantId != null">
+                    tenant_id = #{tenantId},
+                </if>
+                <if test="ruleName != null">
+                    rule_name = #{ruleName},
+                </if>
+                <if test="alarmType != null">
+                    alarm_type = #{alarmType},
+                </if>
+                <if test="alarmRuleType != null">
+                    alarm_rule_type = #{alarmRuleType},
+                </if>
+                <if test="alarmLevel != null">
+                    alarm_level = #{alarmLevel},
+                </if>
+                <if test="alarmSourceObject != null">
+                    alarm_source_object = #{alarmSourceObject},
+                </if>
+                <if test="tempId != null">
+                    temp_id = #{tempId},
+                </if>
+                <if test="tempName != null">
+                    temp_name = #{tempName},
+                </if>
+                <if test="deviceId != null">
+                    device_id = #{deviceId},
+                </if>
+                <if test="deviceName != null">
+                    device_name = #{deviceName},
+                </if>
+                <if test="condition != null">
+                    `condition` = #{condition},
+                </if>
+                <if test="promQl != null">
+                    prom_ql = #{promQl},
+                </if>
+                <if test="ruleDesc != null">
+                    rule_desc = #{ruleDesc},
+                </if>
+                <if test="noticeId != null">
+                    notice_id = #{noticeId},
+                </if>
+                <if test="tempStatus != null">
+                    temp_status = #{tempStatus},
+                </if>
+                <if test="deviceStatus != null">
+                    device_status = #{deviceStatus},
+                </if>
+                <if test="telemetryStatus != null">
+                    telemetry_status = #{telemetryStatus},
+                </if>
+            </trim>
+        </set>
+        where rule_id = #{ruleId}
+    </update>
+
+    <insert id="insertRuleDesc" parameterType="java.util.List">
+        insert into
+        tkeel_alarm_rule_desc
+        (rule_id,tenant_id,temp_id,device_id,telemetry_type,telemetry_id,alarm_source_object,telemetry_name,time,polymerize,operator,`label`,value,plat_rule_id)
+        values
+        <foreach collection ="list" item="desc" separator =",">
+            (#{desc.ruleId},#{desc.tenantId},#{desc.tempId},#{desc.deviceId},#{desc.telemetryType},#{desc.telemetryId},#{desc.alarmSourceObject},#{desc.telemetryName},#{desc.time},#{desc.polymerize},#{desc.operator},#{desc.label},#{desc.value},#{desc.platRuleId})
+        </foreach >
+    </insert>
+
+    <update id="deleteRuleDesc" parameterType="java.lang.Long">
+        update tkeel_alarm_rule_desc
+        <set>
+            deleted = 1
+        </set>
+        where rule_id = #{ruleId}
+    </update>
+
+    <select id="queryRuleDesc" parameterType="java.lang.Long" resultType="com.alarm.tkeel.pojo.rules.Desc">
+        SELECT * from tkeel_alarm_rule_desc where rule_id = #{ruleId} and deleted = 0
+    </select>
+
+    <select id="queryAllRule" resultType="com.alarm.tkeel.pojo.rules.Rule">
+        SELECT * from tkeel_alarm_rule where notice_id != '' and deleted = 0 and enable = 1
+    </select>
+    
+    <select id="queryTempBind" resultType="java.lang.Integer" parameterType="com.alarm.tkeel.pojo.rules.CheckBind" >
+        select * from tkeel_alarm_rule where deleted = 0
+        <if test="tempId != null">
+            and temp_id = #{tempId}
+        </if>
+        <if test="deviceId != null">
+            and device_id = #{deviceId}
+        </if>
+    </select>
+    <select id="queryNoticeByNoticeId" parameterType="com.alarm.tkeel.pojo.mail.BindingQuery" resultType="java.lang.Integer">
+        SELECT count(0)  from tkeel_alarm_rule where deleted = 0 and  tenant_id = #{tenantId} and notice_id like '%${noticeId}%'
+    </select>
+
+    <update id="updateTempStatus" parameterType="com.alarm.tkeel.pojo.notify.TempStatus" >
+        update tkeel_alarm_rule
+        <set>
+            temp_status = #{tempStatus}
+        </set>
+        where deleted = 0 and tenant_id = #{tenantId} and temp_id in
+        <foreach collection="tempId" item="item" index="index" open="(" separator="," close=")">
+            "${item}"
+        </foreach>
+    </update>
+
+    <update id="updateDeviceStatus" parameterType="com.alarm.tkeel.pojo.notify.DeviceStatus" >
+        update tkeel_alarm_rule
+        <set>
+            device_status = #{deviceStatus}
+        </set>
+        where deleted = 0  and tenant_id = #{tenantId} and device_id in
+        <foreach collection="deviceId" item="item" index="index" open="(" separator="," close=")">
+            "${item}"
+        </foreach>
+    </update>
+
+    <update id="updateTelemetryStatus" parameterType="com.alarm.tkeel.pojo.notify.TelemetryStatus" >
+        update tkeel_alarm_rule_desc
+        <set>
+            telemetry_status = #{telemetryStatus}
+        </set>
+        where deleted = 0 and tenant_id = #{tenantId} and telemetry_id in
+        <foreach collection="telemetryId" item="item" index="index" open="(" separator="," close=")">
+            "${item}"
+        </foreach>
+    </update>
+
+    <update id="updateTelemetryStatusByRuleId" parameterType="com.alarm.tkeel.pojo.notify.TelemetryStatus" >
+            update tkeel_alarm_rule
+            <set>
+                telemetry_status=#{telemetryStatus}
+            </set>
+            where tenant_id =#{tenantId} and rule_id in (
+            <foreach collection="ruleId" item="item" index="index" separator=",">
+                ${item}
+            </foreach>
+        )
+    </update>
+
+    <select id="queryRuleIdByTelemetryId" resultType="com.alarm.tkeel.pojo.notify.RuleId" parameterType="com.alarm.tkeel.pojo.notify.TelemetryStatus">
+        select rule_id from tkeel_alarm_rule_desc where deleted = 0 and tenant_id = #{tenantId}
+        <if test="tempId != null">
+            and temp_id = #{tempId}
+        </if>
+        <if test="deviceId != null">
+            and device_id = #{deviceId}
+        </if>
+        and  telemetry_id in
+        <foreach collection="telemetryId" item="item" index="index" open="(" separator="," close=")">
+            "${item}"
+        </foreach>
+    </select>
+
+    <select id="queryRuleStatus"  parameterType="java.lang.String" resultType="com.alarm.tkeel.pojo.rules.Rule">
+        select * from tkeel_alarm_rule where deleted = 0 and tenant_id = #{tenantId} and (temp_status > 0 OR device_status > 0 OR telemetry_status > 0)
+    </select>
+
+</mapper>
