@@ -42,7 +42,7 @@ public class ApiController {
         pointsList.add(addonsPoints);
         Addons addons =new Addons();
         addons.setAddons_point("device-schema-change");
-        addons.setImplemented_endpoint("/v1/notify/update");
+        addons.setImplemented_endpoint("v1/notify/update");
         Plugin plugin =new Plugin();
         plugin.setVersion("v1.0.0");
         plugin.setId("tkeel-device");

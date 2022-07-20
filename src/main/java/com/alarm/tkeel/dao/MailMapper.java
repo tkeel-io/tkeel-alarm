@@ -22,6 +22,8 @@ public interface MailMapper {
 
     List<NoticeGroup> queryNoticeGroupByIds(List<Long> noticeIds);
 
+    List<EmailAddressVo> queryEmailAddress(List<Long> noticeIds);
+
     List<EmailAddress> queryEmailAddressByNoticeId(Long noticeId);
 
     int createEmailAddress(EmailAddressVo emailAddressVo);

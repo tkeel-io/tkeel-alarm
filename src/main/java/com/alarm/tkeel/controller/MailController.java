@@ -183,7 +183,7 @@ public class MailController {
         if(code > 0){
             return ResultData.success(code);
         }
-        return ResultData.fail("io.tkeel.ERROR","测试邮件服务器失败！");
+        return ResultData.fail("io.tkeel.ERROR","邮件发送失败，请检查邮件配置！");
     }
 
     @GetMapping("/alarm/email/query")

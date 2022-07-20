@@ -5,6 +5,7 @@ import com.alarm.tkeel.dao.MailMapper;
 import com.alarm.tkeel.dao.RuleMapper;
 import com.alarm.tkeel.pojo.PortalRuleDesc;
 import com.alarm.tkeel.pojo.mail.Email;
+import com.alarm.tkeel.pojo.mail.EmailAddressVo;
 import com.alarm.tkeel.pojo.mail.NoticeGroup;
 import com.alarm.tkeel.pojo.notify.DeviceStatus;
 import com.alarm.tkeel.pojo.notify.RuleId;
@@ -641,7 +642,7 @@ public class RuleServiceImpl implements RuleService {
             Routes routes = new Routes();
             List<Long> noticeIds =  getNoticeId(rule.getNoticeId());
             //获取所有启用规则的通知列表
-            List<NoticeGroup> noticeGroups = mailMapper.queryNoticeGroupByIds(noticeIds);
+            List<EmailAddressVo> noticeGroups = mailMapper.queryEmailAddress(noticeIds);
             if(noticeGroups == null){
                 System.out.println("setAlertManagerSecret emailList == null");
                 return 0;
@@ -662,7 +663,7 @@ public class RuleServiceImpl implements RuleService {
             List<EmailConfig> emailConfigList = new ArrayList<>();
             EmailConfig emailConfig = new EmailConfig();
             StringBuffer stringBuffer = new StringBuffer();
-            for(NoticeGroup notice : noticeGroups) {
+            for(EmailAddressVo notice : noticeGroups) {
                 if(rule.getNoticeId().contains(notice.getNoticeId().toString())){
                     stringBuffer.append(notice.getEmailAddress());
                     stringBuffer.append(",");

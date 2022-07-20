@@ -6,7 +6,7 @@ spring:
     name: tkeel-alarm #服务名
     #配置数据源,yml格式
   datasource:
-    url: jdbc:mysql://192.168.100.5:32463/tkeel-alarm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.100.5:30838/tkeel-alarm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai
     username: root
     password: a3fks=ixmeb82a
     driver-class-name: com.mysql.jdbc.Driver
