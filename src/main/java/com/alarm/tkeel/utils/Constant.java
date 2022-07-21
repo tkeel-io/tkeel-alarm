@@ -16,7 +16,7 @@ public class Constant {
     public static String ALERT_API_VERSION = "monitoring.coreos.com/v1alpha1";
     public static String RULE_API_VERSION = "monitoring.coreos.com/v1";
 
-    public static String RULE_FOR = "10s";
+    public static String RULE_FOR = "30s";
 
     public static String RULE_KIND = "PrometheusRule";
     public static String ALERT_KIND = "AlertmanagerConfig";
