@@ -69,8 +69,13 @@ public class WebHookController {
 
     //把utc格式日期转换为常见的格式
     public static Long formatTime(String timeStr){
+        SimpleDateFormat dateFormat = null;
         //进行转化时区
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+        if(timeStr.contains("Z")) {
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
+        }else {
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+0000");
+        }
         Date myDate = null;
         try {
             myDate = dateFormat.parse (timeStr.replace("Z","+0000"));
@@ -79,9 +84,6 @@ public class WebHookController {
         }
         //转换为年月日时分秒
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        String format = df.format(myDate);
-//        Date date = format.parse(format);
-//        System.out.println("########3"+myDate.getTime()/1000);
         return myDate.getTime();
     }
 
