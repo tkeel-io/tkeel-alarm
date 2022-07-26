@@ -616,7 +616,7 @@ public class RuleServiceImpl implements RuleService {
         route.setReceiver("default");
         route.setGroup_wait("10s");
         route.setGroup_interval("10s");
-        route.setRepeat_interval("1m");
+        route.setRepeat_interval("10s");
         route.setGroup_by(new String[]{"ruleId"});
 
         Receiver receiver1 = new Receiver();
