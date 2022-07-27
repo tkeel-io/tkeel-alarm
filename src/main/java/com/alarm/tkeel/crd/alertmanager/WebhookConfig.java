@@ -16,4 +16,6 @@ import java.util.StringJoiner;
 public class WebhookConfig {
     private boolean send_resolved;
     private String url;
+    private Integer max_alerts;
+    private HttpConfig http_config;
 }

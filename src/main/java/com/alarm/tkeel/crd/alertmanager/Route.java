@@ -1,5 +1,6 @@
 package com.alarm.tkeel.crd.alertmanager;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 import lombok.Data;
 
@@ -21,4 +22,6 @@ public class Route{
     private String[] group_by;
     private String group_interval = "1s";
 
+    @SerializedName("continue")
+    private Boolean continueText;
 }

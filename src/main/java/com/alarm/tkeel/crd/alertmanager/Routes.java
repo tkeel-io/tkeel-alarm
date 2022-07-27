@@ -2,6 +2,7 @@ package com.alarm.tkeel.crd.alertmanager;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -20,8 +21,13 @@ public class Routes {
     }
 
     private Map<String, String> match = new HashMap<>();
+    private Map<String, String> match_re = new HashMap<>();
     private String receiver;
     private String[] group_by;
+    private String group_interval;
+
+    @SerializedName("continue")
+    private Boolean continueText;
 
     @JsonProperty("match")
     public Map<String, String> getMatch() {
@@ -47,6 +53,7 @@ public class Routes {
     public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
+
 
     public Routes receiver(String receiver) {
         this.receiver = receiver;
