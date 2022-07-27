@@ -661,10 +661,10 @@ public class RuleServiceImpl implements RuleService {
             routes.setMatch(match_map);
 
             routesList.add(routes);
-            List<Routes> routes1 = setRoutesConfig();
-            for(Routes routes2 : routes1){
-                routesList.add(routes2);
-            }
+//            List<Routes> routes1 = setRoutesConfig();
+//            for(Routes routes2 : routes1){
+//                routesList.add(routes2);
+//            }
             route.setRoutes(routesList);
 
             Receiver receiver = new Receiver();
@@ -689,9 +689,9 @@ public class RuleServiceImpl implements RuleService {
         Map<String, byte[]> map = new HashMap<>();
 
         // 设置平台通知默认参数
-        if(route.getRoutes() == null) {
-            route.setRoutes(setRoutesConfig());
-        }
+//        if(route.getRoutes() == null) {
+//            route.setRoutes(setRoutesConfig());
+//        }
         AlertEntity alertEntity = new AlertEntity();
         alertEntity.setGlobal(global);
         alertEntity.setRoute(route);
