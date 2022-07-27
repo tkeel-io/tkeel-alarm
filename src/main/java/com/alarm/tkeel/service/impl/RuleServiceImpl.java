@@ -628,22 +628,43 @@ public class RuleServiceImpl implements RuleService {
         webhookConfig.setSend_resolved(true);
         webhookConfig.setUrl("http://tkeel-alarm.keel-system:31239/webhook/demo");
         webhookConfigsList.add(webhookConfig);
-//        receiver1.setWebhook_configs(webhookConfigsList);
+
+        Receiver receiver2 = new Receiver();
+        receiver1.setName("prometheus");
+        List<WebhookConfig> webhookConfigsList2 = new ArrayList<>();
+        WebhookConfig webhookConfig2 = new WebhookConfig();
+        webhookConfig2.setSend_resolved(true);
+        webhookConfig2.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+        webhookConfigsList2.add(webhookConfig2);
+
+        Receiver receiver3 = new Receiver();
+        receiver1.setName("event");
+        List<WebhookConfig> webhookConfigsList3 = new ArrayList<>();
+        WebhookConfig webhookConfig3 = new WebhookConfig();
+        webhookConfig3.setSend_resolved(true);
+        webhookConfig3.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+        webhookConfigsList3.add(webhookConfig3);
+
+        Receiver receiver4 = new Receiver();
+        receiver1.setName("auditing");
+        List<WebhookConfig> webhookConfigsList4 = new ArrayList<>();
+        WebhookConfig webhookConfig4 = new WebhookConfig();
+        webhookConfig4.setSend_resolved(true);
+        webhookConfig4.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+        webhookConfigsList4.add(webhookConfig4);
 
         List<Receiver> receiverList = new ArrayList<>();
         List<Routes> routesList = new ArrayList<>();
-//        Routes routes_webhook = new Routes();
-//        routes_webhook.setReceiver("webhook");
+
         receiverList.add(receiver1);
-        List<Receiver> receivers = setReceiverConfig();
-        for(Receiver receiver : receivers){
-            receiverList.add(receiver);
-        }
+        receiverList.add(receiver2);
+        receiverList.add(receiver3);
+        receiverList.add(receiver4);
+
         Receiver receiver_webhook = new Receiver();
         receiver_webhook.setName("webhook");
         receiver_webhook.setWebhook_configs(webhookConfigsList);
-//        routesList.add(routes_webhook);
-//        receiverList.add(receiver_webhook);
+
         for(Rule rule : ruleList){
             Routes routes = new Routes();
             List<Long> noticeIds =  getNoticeId(rule.getNoticeId());
@@ -879,16 +900,16 @@ public class RuleServiceImpl implements RuleService {
 
         prometheusRoutes.setReceiver("prometheus");
         prometheusRoutes.setMatch_re(prometheus_map);
-        prometheusRoutes.setContinueText(false);
+//        prometheusRoutes.setContinueText(false);
 
         eventRoutes.setReceiver("event");
         eventRoutes.setMatch(event_map);
-        eventRoutes.setContinueText(false);
+//        eventRoutes.setContinueText(false);
         eventRoutes.setGroup_interval("30s");
 
         auditingRoutes.setReceiver("auditing");
         auditingRoutes.setMatch(auditing_map);
-        auditingRoutes.setContinueText(false);
+//        auditingRoutes.setContinueText(false);
         auditingRoutes.setGroup_interval("30s");
 
         routesList.add(prometheusRoutes);
