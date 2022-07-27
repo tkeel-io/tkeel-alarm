@@ -635,6 +635,10 @@ public class RuleServiceImpl implements RuleService {
 //        Routes routes_webhook = new Routes();
 //        routes_webhook.setReceiver("webhook");
         receiverList.add(receiver1);
+        List<Receiver> receivers = setReceiverConfig();
+        for(Receiver receiver : receivers){
+            receiverList.add(receiver);
+        }
         Receiver receiver_webhook = new Receiver();
         receiver_webhook.setName("webhook");
         receiver_webhook.setWebhook_configs(webhookConfigsList);
