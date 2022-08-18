@@ -124,3 +124,5 @@ CREATE TABLE  if not exists `tkeel-alarm`.`tkeel_alarm_mail_address` (
   `deleted` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2000 DEFAULT CHARSET=utf8mb3;
+
+

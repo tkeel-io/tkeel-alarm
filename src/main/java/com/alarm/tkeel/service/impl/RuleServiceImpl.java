@@ -618,8 +618,6 @@ public class RuleServiceImpl implements RuleService {
         route.setGroup_interval("5s");
         route.setRepeat_interval("5s");
         route.setGroup_by(new String[]{"ruleId"});
-        // 平台通知需要
-        route.setContinueText(false);
 
         Receiver receiver1 = new Receiver();
         receiver1.setName("default");
@@ -630,28 +628,32 @@ public class RuleServiceImpl implements RuleService {
         webhookConfigsList.add(webhookConfig);
 
         Receiver receiver2 = new Receiver();
-        receiver1.setName("prometheus");
+        receiver2.setName("prometheus");
         List<WebhookConfig> webhookConfigsList2 = new ArrayList<>();
         WebhookConfig webhookConfig2 = new WebhookConfig();
         webhookConfig2.setSend_resolved(true);
         webhookConfig2.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
         webhookConfigsList2.add(webhookConfig2);
+        receiver2.setWebhook_configs(webhookConfigsList2);
 
         Receiver receiver3 = new Receiver();
-        receiver1.setName("event");
+        receiver3.setName("event");
         List<WebhookConfig> webhookConfigsList3 = new ArrayList<>();
         WebhookConfig webhookConfig3 = new WebhookConfig();
-        webhookConfig3.setSend_resolved(true);
+        webhookConfig3.setSend_resolved(false);
         webhookConfig3.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
         webhookConfigsList3.add(webhookConfig3);
+        receiver3.setWebhook_configs(webhookConfigsList3);
+
 
         Receiver receiver4 = new Receiver();
-        receiver1.setName("auditing");
+        receiver4.setName("auditing");
         List<WebhookConfig> webhookConfigsList4 = new ArrayList<>();
         WebhookConfig webhookConfig4 = new WebhookConfig();
-        webhookConfig4.setSend_resolved(true);
+        webhookConfig4.setSend_resolved(false);
         webhookConfig4.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
         webhookConfigsList4.add(webhookConfig4);
+        receiver4.setWebhook_configs(webhookConfigsList4);
 
         List<Receiver> receiverList = new ArrayList<>();
         List<Routes> routesList = new ArrayList<>();
@@ -677,15 +679,39 @@ public class RuleServiceImpl implements RuleService {
             routes.setReceiver(String.valueOf(rule.getRuleId()));
 //            routes.setGroup_by(new String[]{"ruleId"});
             Map<String, String> match_map = new HashMap<>();
+//            match_map.put("alerttype",".*");
             match_map.put("tenantId", rule.getTenantId());
             match_map.put("ruleId", String.valueOf(rule.getRuleId()));
             routes.setMatch(match_map);
 
+            Routes prometheusRoutes = new Routes();
+            Routes eventRoutes = new Routes();
+            Routes auditingRoutes = new Routes();
+            Map<String, String> prometheus_map = new HashMap<>();
+            Map<String, String> event_map = new HashMap<>();
+            Map<String, String> auditing_map = new HashMap<>();
+            prometheus_map.put("alerttype",".*");
+            event_map.put("alerttype","event");
+            auditing_map.put("alerttype","auditing");
+
+            prometheusRoutes.setReceiver("prometheus");
+            prometheusRoutes.setMatch_re(prometheus_map);
+//        prometheusRoutes.setContinueText(false);
+
+            eventRoutes.setReceiver("event");
+            eventRoutes.setMatch(event_map);
+//        eventRoutes.setContinueText(false);
+            eventRoutes.setGroup_interval("30s");
+
+            auditingRoutes.setReceiver("auditing");
+            auditingRoutes.setMatch(auditing_map);
+//        auditingRoutes.setContinueText(false);
+            auditingRoutes.setGroup_interval("30s");
+
             routesList.add(routes);
-            List<Routes> routes1 = setRoutesConfig();
-            for(Routes routes2 : routes1){
-                routesList.add(routes2);
-            }
+            routesList.add(prometheusRoutes);
+            routesList.add(eventRoutes);
+            routesList.add(auditingRoutes);
             route.setRoutes(routesList);
 
             Receiver receiver = new Receiver();
@@ -705,14 +731,15 @@ public class RuleServiceImpl implements RuleService {
             emailConfigList.add(emailConfig);
             receiver.setEmail_configs(emailConfigList);
             receiver.setWebhook_configs(webhookConfigsList);
+
             receiverList.add(receiver);
         }
         Map<String, byte[]> map = new HashMap<>();
 
         // 设置平台通知默认参数
-        if(route.getRoutes() == null) {
-            route.setRoutes(setRoutesConfig());
-        }
+//        if(route.getRoutes() == null) {
+//            route.setRoutes(setRoutesConfig());
+//        }
         AlertEntity alertEntity = new AlertEntity();
         alertEntity.setGlobal(global);
         alertEntity.setRoute(route);
@@ -734,7 +761,7 @@ public class RuleServiceImpl implements RuleService {
             ApiClient client = Config.defaultClient();
             Configuration.setDefaultApiClient(client);
             CoreV1Api api = new CoreV1Api();
-            apiResponse = api.deleteNamespacedSecretWithHttpInfo("alertmanager-main",Constant.TKEEL_ALARM_NAMESPACE,null,null,null,null,null,null);
+            apiResponse = api.deleteNamespacedSecretWithHttpInfo(Constant.ALERT_MANAGER_NAME,Constant.TKEEL_ALARM_NAMESPACE,null,null,null,null,null,null);
             System.out.println("v1Status == "+ apiResponse.getStatusCode());
             V1Secret secret = api.createNamespacedSecret(Constant.TKEEL_ALARM_NAMESPACE,v1Secret,null,null,null,null);
         } catch (ApiException e) {
@@ -852,71 +879,71 @@ public class RuleServiceImpl implements RuleService {
      * 默认加上系统平台通知配置
      * @return
      */
-    public List<Receiver> setReceiverConfig(){
+//    public List<Receiver> setReceiverConfig(){
+//
+//        List<Receiver> receivers =new ArrayList<>();
+//        List<WebhookConfig> webhookConfigList =new ArrayList<>();
+//        Receiver prometheusReceiver = new Receiver();
+//        Receiver eventReceiver = new Receiver();
+//        Receiver auditingReceiver = new Receiver();
+//
+//
+//        HttpConfig httpConfig =new HttpConfig();
+//        httpConfig.setFollow_redirects(true);
+//
+//        WebhookConfig webhookConfig =new WebhookConfig();
+//        webhookConfig.setSend_resolved(true);
+//        webhookConfig.setMax_alerts(0);
+//        webhookConfig.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+//        webhookConfig.setHttp_config(httpConfig);
+//        webhookConfigList.add(webhookConfig);
+//
+//
+//        prometheusReceiver.setName("prometheus");
+//        prometheusReceiver.setWebhook_configs(webhookConfigList);
+//        eventReceiver.setName("event");
+//        eventReceiver.setWebhook_configs(webhookConfigList);
+//        auditingReceiver.setName("auditing");
+//        auditingReceiver.setWebhook_configs(webhookConfigList);
+//
+//        receivers.add(prometheusReceiver);
+//        receivers.add(eventReceiver);
+//        receivers.add(auditingReceiver);
+//
+//        return  receivers;
+//    }
 
-        List<Receiver> receivers =new ArrayList<>();
-        List<WebhookConfig> webhookConfigList =new ArrayList<>();
-        Receiver prometheusReceiver = new Receiver();
-        Receiver eventReceiver = new Receiver();
-        Receiver auditingReceiver = new Receiver();
-
-
-        HttpConfig httpConfig =new HttpConfig();
-        httpConfig.setFollow_redirects(true);
-
-        WebhookConfig webhookConfig =new WebhookConfig();
-        webhookConfig.setSend_resolved(true);
-        webhookConfig.setMax_alerts(0);
-        webhookConfig.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
-        webhookConfig.setHttp_config(httpConfig);
-        webhookConfigList.add(webhookConfig);
-
-
-        prometheusReceiver.setName("prometheus");
-        prometheusReceiver.setWebhook_configs(webhookConfigList);
-        eventReceiver.setName("event");
-        eventReceiver.setWebhook_configs(webhookConfigList);
-        auditingReceiver.setName("auditing");
-        auditingReceiver.setWebhook_configs(webhookConfigList);
-
-        receivers.add(prometheusReceiver);
-        receivers.add(eventReceiver);
-        receivers.add(auditingReceiver);
-
-        return  receivers;
-    }
-
-    public List<Routes> setRoutesConfig(){
-        List<Routes> routesList = new ArrayList<>();
-        Routes prometheusRoutes = new Routes();
-        Routes eventRoutes = new Routes();
-        Routes auditingRoutes = new Routes();
-        Map<String, String> prometheus_map = new HashMap<>();
-        Map<String, String> event_map = new HashMap<>();
-        Map<String, String> auditing_map = new HashMap<>();
-        prometheus_map.put("alerttype",".*");
-        event_map.put("alerttype","event");
-        auditing_map.put("alerttype","auditing");
-
-        prometheusRoutes.setReceiver("prometheus");
-        prometheusRoutes.setMatch_re(prometheus_map);
-//        prometheusRoutes.setContinueText(false);
-
-        eventRoutes.setReceiver("event");
-        eventRoutes.setMatch(event_map);
-//        eventRoutes.setContinueText(false);
-        eventRoutes.setGroup_interval("30s");
-
-        auditingRoutes.setReceiver("auditing");
-        auditingRoutes.setMatch(auditing_map);
-//        auditingRoutes.setContinueText(false);
-        auditingRoutes.setGroup_interval("30s");
-
-        routesList.add(prometheusRoutes);
-        routesList.add(eventRoutes);
-        routesList.add(auditingRoutes);
-
-        return routesList;
-    }
+//    public List<Routes> setRoutesConfig(){
+//        List<Routes> routesList = new ArrayList<>();
+//        Routes prometheusRoutes = new Routes();
+//        Routes eventRoutes = new Routes();
+//        Routes auditingRoutes = new Routes();
+//        Map<String, String> prometheus_map = new HashMap<>();
+//        Map<String, String> event_map = new HashMap<>();
+//        Map<String, String> auditing_map = new HashMap<>();
+//        prometheus_map.put("alerttype",".*");
+//        event_map.put("alerttype","event");
+//        auditing_map.put("alerttype","auditing");
+//
+//        prometheusRoutes.setReceiver("prometheus");
+//        prometheusRoutes.setMatch_re(prometheus_map);
+////        prometheusRoutes.setContinueText(false);
+//
+//        eventRoutes.setReceiver("event");
+//        eventRoutes.setMatch(event_map);
+////        eventRoutes.setContinueText(false);
+//        eventRoutes.setGroup_interval("30s");
+//
+//        auditingRoutes.setReceiver("auditing");
+//        auditingRoutes.setMatch(auditing_map);
+////        auditingRoutes.setContinueText(false);
+//        auditingRoutes.setGroup_interval("30s");
+//
+//        routesList.add(prometheusRoutes);
+//        routesList.add(eventRoutes);
+//        routesList.add(auditingRoutes);
+//
+//        return routesList;
+//    }
 }
 

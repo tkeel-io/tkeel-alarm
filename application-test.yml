@@ -6,18 +6,13 @@ spring:
     name: tkeel-alarm #服务名
     #配置数据源,yml格式
   datasource:
-    url: jdbc:mysql://192.168.100.5:32249/tkeel-alarm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://tkeel-middleware-mysql:3306/tkeel-alarm?useUnicode=true&characterEncoding=utf8
     username: root
     password: a3fks=ixmeb82a
     driver-class-name: com.mysql.jdbc.Driver
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
-  mail:
-    host:
-    port:
-    username:
-    password:
 
 config2:
     version: v0.0.1
@@ -51,7 +46,6 @@ ok:
 #恩菲webhook地址
 webhook:
   url: http://10.10.7.51:31400/message/iot/webhook/receive
-
 
 management:
   endpoints:

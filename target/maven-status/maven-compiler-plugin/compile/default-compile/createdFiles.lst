@@ -15,6 +15,7 @@ com\alarm\tkeel\pojo\notify\Action.class
 com\alarm\tkeel\controller\RuleController.class
 com\alarm\tkeel\crd\alertmanager\AlertEntity.class
 com\alarm\tkeel\crd\alertmanager\ObjectMeta.class
+com\alarm\tkeel\crd\alertmanager\HttpConfig.class
 com\alarm\tkeel\crd\alertmanager\EmailConfig.class
 com\alarm\tkeel\service\RuleService.class
 com\alarm\tkeel\service\MailService.class

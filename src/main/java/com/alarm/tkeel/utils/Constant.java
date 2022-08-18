@@ -26,5 +26,5 @@ public class Constant {
     public static String GROUP_NAME = "tkeel.alarm.rules";
     public static String SECRET_KIND = "Secret";
 
-    public static String ALERT_MANAGER_NAME = "alertmanager-main";
+    public static String ALERT_MANAGER_NAME = "alertmanager-main-generated";
 }

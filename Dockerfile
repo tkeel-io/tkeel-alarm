@@ -39,9 +39,10 @@ ENV WORK_PATH /temp/$PROJECT_NAME
 WORKDIR /app
 
 COPY --from=compile_stage $WORK_PATH/target/${PROJECT_NAME}-${PROJECT_VERSION}.jar ./app.jar
-
+COPY application-test.yml ./application-test.yml
 
 # 暴露端口
 EXPOSE 8080
 # java项目的启动命令
-ENTRYPOINT java -jar /app/app.jar --spring.profiles.active=test
+#ENTRYPOINT java -jar /app/app.jar  --spring.profiles.active=test
+ENTRYPOINT java -jar /app/app.jar --spring.config.location=./application-test.yml
