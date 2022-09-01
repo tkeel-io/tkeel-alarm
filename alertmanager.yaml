@@ -1,10 +1,10 @@
 --- !com.alarm.tkeel.crd.alertmanager.AlertEntity
 global: !com.alarm.tkeel.crd.alertmanager.Global
   resolve_timeout: 5m
-  smtp_auth_password: cjdxTX.9Ppfp8Fs
-  smtp_auth_username: lunzhou
-  smtp_from: lunzhou@yunify.com
-  smtp_smarthost: "smtp.yunify.com:25"
+  smtp_auth_password: ''
+  smtp_auth_username: ''
+  smtp_from: ''
+  smtp_smarthost: ""
 receivers: 
   - !com.alarm.tkeel.crd.alertmanager.Receiver
     name: default
