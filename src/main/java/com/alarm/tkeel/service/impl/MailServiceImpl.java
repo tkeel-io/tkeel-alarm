@@ -22,8 +22,6 @@ public class MailServiceImpl implements MailService {
     @Autowired
     private RuleServiceImpl ruleService;
 
-    @Autowired
-    private JavaMailSender javaMailSender;
 
 
     @Override
