@@ -26,7 +26,7 @@ RUN cd $WORK_PATH && mvn clean package -U -DskipTests
 
 
 ### 第二阶段，用第一阶段的jar和jre镜像合成一个小体积的镜像
-FROM java:8-jre-alpine
+FROM openjdk:8-jre-alpine
 
 #定义工程名称，也是源文件的文件夹名称
 ENV PROJECT_NAME iot-alarm

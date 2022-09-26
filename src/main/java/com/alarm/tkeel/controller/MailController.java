@@ -32,6 +32,10 @@ public class MailController {
     @Autowired
     private RuleMapper ruleMapper;
 
+    @Autowired
+    private EmailSendUtils emailSendUtils;
+
+
 
     @PostMapping("/alarm/mailConfig")
     @ApiOperation(value = "邮箱配置",notes = "邮箱配置",produces = "application/json")
@@ -178,7 +182,7 @@ public class MailController {
         if(email == null){
             return ResultData.fail("io.tkeel.INTERNAL_ERROR","无效参数！");
         }
-        EmailSendUtils emailSendUtils =new EmailSendUtils();
+//        EmailSendUtils emailSendUtils =new EmailSendUtils();
         int code = emailSendUtils.sendWithText(email);
         if(code > 0){
             return ResultData.success(code);

@@ -9,7 +9,7 @@ spring:
     url: jdbc:mysql://192.168.100.5:32249/tkeel-alarm?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai
     username: root
     password: a3fks=ixmeb82a
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss

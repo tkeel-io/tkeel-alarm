@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.mail.internet.MimeMessage;
@@ -16,12 +17,8 @@ import java.util.Properties;
  * @Description 开心工作，快乐生活
  * @Date 2022/07/08/14:09
  */
-@Service
+@Component
 public class EmailSendUtils {
-    // 邮件发送类
-    @Autowired
-    private JavaMailSender mailSender;
-    // 简单邮件信息类
 
 
     /**
@@ -30,7 +27,7 @@ public class EmailSendUtils {
      */
     public  int sendWithText(Email email) {
         try {
-            mailSender = new JavaMailSenderImpl();
+            JavaMailSender   mailSender = new JavaMailSenderImpl();
             String host = email.getSmtpAddress();
             String userName = email.getSmtpUserName();
             String password =email.getSmtpPassWord();
