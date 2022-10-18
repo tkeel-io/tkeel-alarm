@@ -7,10 +7,11 @@ import com.alarm.tkeel.pojo.notify.RuleId;
 import com.alarm.tkeel.pojo.notify.TelemetryStatus;
 import com.alarm.tkeel.pojo.notify.TempStatus;
 import com.alarm.tkeel.pojo.rules.*;
+import org.mapstruct.Mapper;
 
 import java.util.List;
 
-
+@Mapper
 public interface RuleMapper {
 
     List<Rule> queryRuleList(RuleParamVo ruleParamVo);
