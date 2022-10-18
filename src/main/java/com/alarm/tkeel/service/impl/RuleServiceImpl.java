@@ -639,6 +639,9 @@ public class RuleServiceImpl implements RuleService {
         WebhookConfig webhookConfig = new WebhookConfig();
         webhookConfig.setSend_resolved(true);
         webhookConfig.setUrl("http://tkeel-alarm.keel-system:31239/webhook/demo");
+        webhookConfig = new WebhookConfig();
+        webhookConfig.setSend_resolved(true);
+        webhookConfig.setUrl("http://tkeel-alarm.dapr-system:31239/webhook/demo");
         webhookConfigsList.add(webhookConfig);
 
         Receiver receiver2 = new Receiver();
