@@ -36,6 +36,7 @@ import org.ho.yaml.Yaml;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -48,9 +49,9 @@ import java.util.stream.Stream;
 @Service
 public class RuleServiceImpl implements RuleService {
 
-    @Autowired
+    @Resource
     private RuleMapper ruleMapper;
-    @Autowired
+    @Resource
     private MailMapper mailMapper;
     @Autowired
     private CRDService crdService;
@@ -58,7 +59,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public PageInfo<Rule> queryRuleList(RuleParamVo ruleParamVo) {
         // 设置分页参数; pageNum:页码, pageSize:每页大小
-        PageHelper.startPage(ruleParamVo.getPageNum(),ruleParamVo.getPageSize());
+        PageHelper.startPage(ruleParamVo.getPageNum(), ruleParamVo.getPageSize());
         // 执行sql查询方法查询所有数据, 会自动分页
         List<Rule> list = ruleMapper.queryRuleList(ruleParamVo);
         return new PageInfo<Rule>(list);
@@ -68,16 +69,16 @@ public class RuleServiceImpl implements RuleService {
     public int setNotice(UpdateNoticeParamVo updateNoticeParam) {
         int code = 0;
         int result = ruleMapper.setNotice(updateNoticeParam);
-        if(result > 0 ) {
+        if (result > 0) {
             code = setAlertManagerSecret();
-        }else {
+        } else {
             return 0;
         }
         return code;
     }
 
     @Override
-    public int setEnable(EnableParamVo enableParamVo){
+    public int setEnable(EnableParamVo enableParamVo) {
         int result = ruleMapper.setEnable(enableParamVo);
         // 当停用规则时，需删除通知，否则会持续告警
 //        if(enableParamVo.getEnable() == 0){
@@ -94,24 +95,24 @@ public class RuleServiceImpl implements RuleService {
 //        }
         // 重新设置通知配置
         setAlertManagerSecret();
-        if(result > 0){
+        if (result > 0) {
             //此处需要调用CRD接口配置规则
-            RuleParamVo rule =ruleMapper.queryRuleByCRD(enableParamVo.getRuleId());
-            if(rule != null){
-                result = setRuleConfigCR(rule,enableParamVo.getEnable());
-              if(result != 200){
-                  System.out.println("设置规则配置失败，id = "+rule.getRuleId());
-              }
-            }else {
+            RuleParamVo rule = ruleMapper.queryRuleByCRD(enableParamVo.getRuleId());
+            if (rule != null) {
+                result = setRuleConfigCR(rule, enableParamVo.getEnable());
+                if (result != 200) {
+                    System.out.println("设置规则配置失败，id = " + rule.getRuleId());
+                }
+            } else {
                 result = 500;
-                System.out.println("获取规则失败，id = "+rule.getRuleId());
+                System.out.println("获取规则失败，id = " + rule.getRuleId());
             }
         }
         return result;
     }
 
     @Override
-    public int deleteRule(DeleteParamVo deleteParamVo){
+    public int deleteRule(DeleteParamVo deleteParamVo) {
 //        int ruleCode = 0 ;
 //        int alertCode = 0;
 //        int result = ruleMapper.deleteRule(deleteParamVo);
@@ -138,9 +139,9 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public Long createRule(RuleParamVo ruleParamVo) {
         Long ruleId = null;
-        Rule rule =new Rule();
+        Rule rule = new Rule();
 //        RuleDesc ruleDesc =new RuleDesc();
-        List<Desc> descList =new ArrayList<>();
+        List<Desc> descList = new ArrayList<>();
         rule.setTenantId(ruleParamVo.getTenantId());
         rule.setRuleName(ruleParamVo.getRuleName());
         rule.setAlarmType(ruleParamVo.getAlarmType());
@@ -149,10 +150,10 @@ public class RuleServiceImpl implements RuleService {
         rule.setAlarmSourceObject(ruleParamVo.getAlarmSourceObject());
         rule.setCondition(ruleParamVo.getCondition());
         // 遍历规则条件，拼接promQL表达式
-        StringBuffer promQl =new StringBuffer();
-        StringBuffer desc =new StringBuffer();
+        StringBuffer promQl = new StringBuffer();
+        StringBuffer desc = new StringBuffer();
         StringBuffer platRuleIds = new StringBuffer();
-        if(rule.getAlarmSourceObject() == 1) {
+        if (rule.getAlarmSourceObject() == 1) {
             // 当告警源对象为 设备时
             rule.setTempId(ruleParamVo.getTempId());
             rule.setTempName(ruleParamVo.getTempName());
@@ -161,9 +162,9 @@ public class RuleServiceImpl implements RuleService {
             rule.setTelemetryId(ruleParamVo.getTelemetryId());
             // 布尔 或者 枚举 时
             for (DeviceCondition deviceCondition : ruleParamVo.getDeviceCondition()) {
-                Desc de =new Desc();
+                Desc de = new Desc();
                 // 遥测为 枚举 或者 比尔类型
-                if(deviceCondition.getTelemetryType() == 0 || deviceCondition.getTelemetryType() == 1) {
+                if (deviceCondition.getTelemetryType() == 0 || deviceCondition.getTelemetryType() == 1) {
 //                    promQl.append(ruleParamVo.getTenantId());
                     promQl.append(Constant.METRIC_NAMES);
 //                    promQl.append(deviceCondition.getTelemetryId());
@@ -178,14 +179,14 @@ public class RuleServiceImpl implements RuleService {
                     promQl.append(deviceCondition.getTelemetryId());
                     promQl.append("\"");
                     promQl.append(",");
-                    if(rule.getTempId() != null && !rule.getTempId().equals("")){
+                    if (rule.getTempId() != null && !rule.getTempId().equals("")) {
                         promQl.append(",");
                         promQl.append("template_id=");
                         promQl.append("\"");
                         promQl.append(rule.getTempId());
                         promQl.append("\"");
                     }
-                    if(rule.getDeviceId() != null && !rule.getDeviceId().equals("")) {
+                    if (rule.getDeviceId() != null && !rule.getDeviceId().equals("")) {
                         promQl.append(",");
                         promQl.append("entity_id=");
                         promQl.append("\"");
@@ -201,16 +202,16 @@ public class RuleServiceImpl implements RuleService {
                     } else if (ruleParamVo.getCondition().equals("and") && ruleParamVo.getDeviceCondition().size() >= 2) {
                         promQl.append(" or ");
                     }
-                }else {
+                } else {
                     // 平均值、最大、最小值
-                    if(deviceCondition.getTime() > 0){
-                        if(deviceCondition.getPolymerize().equals("avg")){
+                    if (deviceCondition.getTime() > 0) {
+                        if (deviceCondition.getPolymerize().equals("avg")) {
                             promQl.append("avg_over_time(");
                         }
-                        if(deviceCondition.getPolymerize().equals("max")){
+                        if (deviceCondition.getPolymerize().equals("max")) {
                             promQl.append("max_over_time(");
                         }
-                        if(deviceCondition.getPolymerize().equals("min")){
+                        if (deviceCondition.getPolymerize().equals("min")) {
                             promQl.append("min_over_time(");
                         }
                     }
@@ -219,20 +220,21 @@ public class RuleServiceImpl implements RuleService {
                     promQl.append("tenant_id=");
                     promQl.append("\"");
                     promQl.append(ruleParamVo.getTenantId());
-                    promQl.append("\"");;
+                    promQl.append("\"");
+                    ;
                     promQl.append(",");
                     promQl.append("telemetry_id=");
                     promQl.append("\"");
                     promQl.append(deviceCondition.getTelemetryId());
                     promQl.append("\"");
-                    if(rule.getTempId() != null && !rule.getTempId().equals("")){
+                    if (rule.getTempId() != null && !rule.getTempId().equals("")) {
                         promQl.append(",");
                         promQl.append("template_id=");
                         promQl.append("\"");
                         promQl.append(rule.getTempId());
                         promQl.append("\"");
                     }
-                    if(rule.getDeviceId() != null && !rule.getDeviceId().equals("")) {
+                    if (rule.getDeviceId() != null && !rule.getDeviceId().equals("")) {
                         promQl.append(",");
                         promQl.append("entity_id=");
                         promQl.append("\"");
@@ -240,10 +242,10 @@ public class RuleServiceImpl implements RuleService {
                         promQl.append("\"");
                     }
                     promQl.append("}");
-                    if(deviceCondition.getTime() > 0){
-                        promQl.append("["+ deviceCondition.getTime() +"m]");
+                    if (deviceCondition.getTime() > 0) {
+                        promQl.append("[" + deviceCondition.getTime() + "m]");
                     }
-                    if(deviceCondition.getTime() != 0) {
+                    if (deviceCondition.getTime() != 0) {
                         promQl.append(")");
                     }
                     promQl.append(operator(deviceCondition.getOperator()));
@@ -271,32 +273,31 @@ public class RuleServiceImpl implements RuleService {
                 descList.add(de);
             }
             if (ruleParamVo.getCondition().equals("and")) {
-                rule.setPromQl(intercept(promQl.toString(),"and"));
+                rule.setPromQl(intercept(promQl.toString(), "and"));
+            } else if (ruleParamVo.getCondition().equals("or")) {
+                rule.setPromQl(intercept(promQl.toString(), "or"));
             }
-            else if (ruleParamVo.getCondition().equals("or")){
-                rule.setPromQl(intercept(promQl.toString(),"or"));
-            }
-        }else {
-            Desc de =new Desc();
+        } else {
+            Desc de = new Desc();
             //当告警源对象为 平台时
-            if(ruleParamVo.getPlatformRuleList() != null){
-                for(PlatformRule platformRule : ruleParamVo.getPlatformRuleList()){
+            if (ruleParamVo.getPlatformRuleList() != null) {
+                for (PlatformRule platformRule : ruleParamVo.getPlatformRuleList()) {
                     desc.append(platformRule.getAlarmDesc() + ",");
-                    promQl.append(replaceStr(platformRule.getPromQl(),ruleParamVo.getTenantId()) + " or ");
+                    promQl.append(replaceStr(platformRule.getPromQl(), ruleParamVo.getTenantId()) + " or ");
                     platRuleIds.append(platformRule.getId() + ",");
                 }
-            }else {
+            } else {
                 return -1L;
             }
             de.setTenantId(ruleParamVo.getTenantId());
             de.setAlarmSourceObject(ruleParamVo.getAlarmSourceObject());
             de.setPlatRuleId(platRuleIds.toString().substring(0, platRuleIds.toString().lastIndexOf(",")));
             descList.add(de);
-            rule.setPromQl(intercept(promQl.toString(),"or"));
+            rule.setPromQl(intercept(promQl.toString(), "or"));
         }
         rule.setRuleDesc(desc.toString().substring(0, desc.toString().lastIndexOf(",")));
 
-        if(ruleParamVo.getRuleId() != null){
+        if (ruleParamVo.getRuleId() != null) {
             // 更新规则
             rule.setRuleId(ruleParamVo.getRuleId());
             rule.setTempStatus(0);
@@ -305,15 +306,15 @@ public class RuleServiceImpl implements RuleService {
             ruleMapper.updateRule(rule);
             // 先删除之前的记录
             ruleMapper.deleteRuleDesc(ruleParamVo.getRuleId());
-            ruleId =  ruleParamVo.getRuleId();
-            if(ruleParamVo.getEnable() == 1) {
+            ruleId = ruleParamVo.getRuleId();
+            if (ruleParamVo.getEnable() == 1) {
                 // 当规则状态为启用状态时-更新CRD规则配置
                 int result = setRuleConfigCR(ruleParamVo, 2);
                 if (result != 200) {
                     System.out.println("更新规则配置失败，id = " + rule.getRuleId());
                 }
             }
-        }else {
+        } else {
             ruleId = ruleMapper.createRule(rule);
         }
         if (ruleId > 0) {
@@ -367,18 +368,18 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public int updateTelemetryStatus(TelemetryStatus telemetryStatus) {
         //通过遥测ID与租户ID查出规则ID
-        List<RuleId> longList =  ruleMapper.queryRuleIdByTelemetryId(telemetryStatus);
-        if(longList == null || longList.size() <= 0){
-            System.out.println("updateTelemetryStatus : 未找到相关遥测信息，"+JSON.toJSONString(telemetryStatus.getTelemetryId()));
+        List<RuleId> longList = ruleMapper.queryRuleIdByTelemetryId(telemetryStatus);
+        if (longList == null || longList.size() <= 0) {
+            System.out.println("updateTelemetryStatus : 未找到相关遥测信息，" + JSON.toJSONString(telemetryStatus.getTelemetryId()));
             return 1;
         }
         List<RuleId> ruleId = longList.stream().distinct().collect(Collectors.toList());
         List<Long> longs = new ArrayList<>();
-        for (RuleId id : ruleId){
+        for (RuleId id : ruleId) {
             longs.add(id.getRuleId());
         }
         // 先更新规则表tkeel_alarm_rule中的遥测状态
-       TelemetryStatus status =new TelemetryStatus();
+        TelemetryStatus status = new TelemetryStatus();
         status.setRuleId(longs);
         status.setTelemetryStatus(telemetryStatus.getTelemetryStatus());
         status.setTenantId(telemetryStatus.getTenantId());
@@ -405,24 +406,25 @@ public class RuleServiceImpl implements RuleService {
     }
 
     /**
-     *  截取最后一个key之前的字符串
+     * 截取最后一个key之前的字符串
+     *
      * @param str
      * @param key
      * @return
      */
-    private String intercept(String str,String key){
-        if(str.contains(key)){
-             String s = str.substring(0, str.lastIndexOf(key));
-             if(s.contains("'")){
-                 return s.replace("'","\"");
-             }else {
-              return s;
-             }
+    private String intercept(String str, String key) {
+        if (str.contains(key)) {
+            String s = str.substring(0, str.lastIndexOf(key));
+            if (s.contains("'")) {
+                return s.replace("'", "\"");
+            } else {
+                return s;
+            }
 
-        }else {
-            if(str.contains("'")){
-                return str.replace("'","\"");
-            }else {
+        } else {
+            if (str.contains("'")) {
+                return str.replace("'", "\"");
+            } else {
                 return str;
             }
         }
@@ -430,72 +432,75 @@ public class RuleServiceImpl implements RuleService {
 
     /**
      * 返回运算符
+     *
      * @param value
      * @return
      */
-    private String operator(String value){
-        if(value.equals("eq")) {
+    private String operator(String value) {
+        if (value.equals("eq")) {
             return "==";
-        }else if(value.equals("ne")) {
+        } else if (value.equals("ne")) {
             return "!=";
-        }else if(value.equals("gt")) {
+        } else if (value.equals("gt")) {
             return ">";
-        }else if(value.equals("lt")) {
+        } else if (value.equals("lt")) {
             return "<";
-        }else if(value.equals("ge")) {
+        } else if (value.equals("ge")) {
             return ">=";
-        }else if(value.equals("le")) {
+        } else if (value.equals("le")) {
             return "<=";
-        }else {
+        } else {
             return "";
         }
     }
 
     /**
      * 替换字符串
+     *
      * @param str
      * @param tenantId
      * @return
      */
-    public String replaceStr(String str,String tenantId){
-        if(str!=null && !str.equals("") && str.contains("tkeel-tenant")){
+    public String replaceStr(String str, String tenantId) {
+        if (str != null && !str.equals("") && str.contains("tkeel-tenant")) {
             return str.replaceAll("tkeel-tenant", tenantId);
-        }else {
+        } else {
             return str;
         }
     }
 
     /**
      * 设置告警规则配置到CR
+     *
      * @return
      */
-    private int setRuleConfigCR(RuleParamVo rule,int enable){
-        if(enable == 1) {
+    private int setRuleConfigCR(RuleParamVo rule, int enable) {
+        if (enable == 1) {
             //创建规则
             V1PrometheusRule v1PrometheusRule = getRuleConfig(rule);
             try {
                 return crdService.createPrometheusRuleCR(v1PrometheusRule);
             } catch (ApiException e) {
-               System.out.println("createPrometheusRuleCR error "+e.getMessage());
-               return 0;
-            }
-
-        }else if(enable == 0){
-            // 删除规则
-            try {
-                return crdService.deletePrometheusRuleCR(Constant.TKEEL_ALARM_NAMESPACE,Constant.RULE_NAME_PREFIX+rule.getRuleId());
-            } catch (ApiException e) {
-                System.out.println("deletePrometheusRuleCR error "+e.getMessage());
+                System.out.println("createPrometheusRuleCR error " + e.getMessage());
                 return 0;
             }
-        }else {
+
+        } else if (enable == 0) {
+            // 删除规则
+            try {
+                return crdService.deletePrometheusRuleCR(Constant.TKEEL_ALARM_NAMESPACE, Constant.RULE_NAME_PREFIX + rule.getRuleId());
+            } catch (ApiException e) {
+                System.out.println("deletePrometheusRuleCR error " + e.getMessage());
+                return 0;
+            }
+        } else {
             // 更新规则
             try {
-                RuleParamVo ruleParamVo =ruleMapper.queryRuleByCRD(rule.getRuleId());
+                RuleParamVo ruleParamVo = ruleMapper.queryRuleByCRD(rule.getRuleId());
                 V1PrometheusRule v1PrometheusRule = getRuleConfig(ruleParamVo);
-                return crdService.updatePrometheusRuleCR(v1PrometheusRule,Constant.TKEEL_ALARM_NAMESPACE,Constant.RULE_NAME_PREFIX+rule.getRuleId());
+                return crdService.updatePrometheusRuleCR(v1PrometheusRule, Constant.TKEEL_ALARM_NAMESPACE, Constant.RULE_NAME_PREFIX + rule.getRuleId());
             } catch (ApiException e) {
-                System.out.println("updatePrometheusRuleCR error "+e.getMessage());
+                System.out.println("updatePrometheusRuleCR error " + e.getMessage());
                 return 0;
             }
         }
@@ -581,22 +586,31 @@ public class RuleServiceImpl implements RuleService {
 
     /**
      * 设置AlertManager告警通知Secret
+     *
      * @return
      */
-    public int setAlertManagerSecret(){
+    public int setAlertManagerSecret() {
+        int ret =0;
+        for(String name:Constant.ALERT_MANAGER_NAME){
+            ret +=setAlertManagerSecret(name);
+        }
+        return ret>0?1:0;
+    }
+
+    public int setAlertManagerSecret(String secretName) {
         List<Rule> ruleList = ruleMapper.queryAllRule();
         Email email = mailMapper.queryMailConfig();
-        if(ruleList == null){
+        if (ruleList == null) {
             System.out.println("setAlertManagerSecret Rule == null");
             return 0;
         }
-        if(email == null){
+        if (email == null) {
             System.out.println("setAlertManagerSecret email == null");
             return 0;
         }
         Global global = new Global();
         global.setResolve_timeout("5m");
-        global.setSmtp_smarthost(email.getSmtpAddress()+":"+ email.getPort());
+        global.setSmtp_smarthost(email.getSmtpAddress() + ":" + email.getPort());
         global.setSmtp_auth_username(email.getSmtpUserName());
         global.setSmtp_auth_password(email.getSmtpPassWord());
         global.setSmtp_from(email.getFromAddress());
@@ -607,7 +621,7 @@ public class RuleServiceImpl implements RuleService {
         v1Secret.setKind(Constant.SECRET_KIND);
         V1ObjectMeta v1ObjectMeta = new V1ObjectMeta();
         v1ObjectMeta.setNamespace(Constant.TKEEL_ALARM_NAMESPACE);
-        v1ObjectMeta.setName(Constant.ALERT_MANAGER_NAME);
+        v1ObjectMeta.setName(secretName);
         v1ObjectMeta.setAnnotations(null);
         v1Secret.setMetadata(v1ObjectMeta);
         v1Secret.setType("Opaque");
@@ -667,12 +681,12 @@ public class RuleServiceImpl implements RuleService {
         receiver_webhook.setName("webhook");
         receiver_webhook.setWebhook_configs(webhookConfigsList);
 
-        for(Rule rule : ruleList){
+        for (Rule rule : ruleList) {
             Routes routes = new Routes();
-            List<Long> noticeIds =  getNoticeId(rule.getNoticeId());
+            List<Long> noticeIds = getNoticeId(rule.getNoticeId());
             //获取所有启用规则的通知列表
             List<EmailAddressVo> noticeGroups = mailMapper.queryEmailAddress(noticeIds);
-            if(noticeGroups == null){
+            if (noticeGroups == null) {
                 System.out.println("setAlertManagerSecret emailList == null");
                 return 0;
             }
@@ -690,9 +704,9 @@ public class RuleServiceImpl implements RuleService {
             Map<String, String> prometheus_map = new HashMap<>();
             Map<String, String> event_map = new HashMap<>();
             Map<String, String> auditing_map = new HashMap<>();
-            prometheus_map.put("alerttype",".*");
-            event_map.put("alerttype","event");
-            auditing_map.put("alerttype","auditing");
+            prometheus_map.put("alerttype", ".*");
+            event_map.put("alerttype", "event");
+            auditing_map.put("alerttype", "auditing");
 
             prometheusRoutes.setReceiver("prometheus");
             prometheusRoutes.setMatch_re(prometheus_map);
@@ -720,8 +734,8 @@ public class RuleServiceImpl implements RuleService {
             List<EmailConfig> emailConfigList = new ArrayList<>();
             EmailConfig emailConfig = new EmailConfig();
             StringBuffer stringBuffer = new StringBuffer();
-            for(EmailAddressVo notice : noticeGroups) {
-                if(rule.getNoticeId().contains(notice.getNoticeId().toString())){
+            for (EmailAddressVo notice : noticeGroups) {
+                if (rule.getNoticeId().contains(notice.getNoticeId().toString())) {
                     stringBuffer.append(notice.getEmailAddress());
                     stringBuffer.append(",");
                 }
@@ -752,7 +766,7 @@ public class RuleServiceImpl implements RuleService {
             e.printStackTrace();
         }
         byte[] be = encryptToBase64(System.getProperty("user.dir") + "/alertmanager.yaml");
-        map.put("alertmanager.yaml",be);
+        map.put("alertmanager.yaml", be);
 
         v1Secret.setData(map);
         ApiResponse<V1Status> apiResponse = null;
@@ -761,12 +775,12 @@ public class RuleServiceImpl implements RuleService {
             ApiClient client = Config.defaultClient();
             Configuration.setDefaultApiClient(client);
             CoreV1Api api = new CoreV1Api();
-            apiResponse = api.deleteNamespacedSecretWithHttpInfo(Constant.ALERT_MANAGER_NAME,Constant.TKEEL_ALARM_NAMESPACE,null,null,null,null,null,null);
-            System.out.println("v1Status == "+ apiResponse.getStatusCode());
-            V1Secret secret = api.createNamespacedSecret(Constant.TKEEL_ALARM_NAMESPACE,v1Secret,null,null,null,null);
+            apiResponse = api.deleteNamespacedSecretWithHttpInfo(secretName, Constant.TKEEL_ALARM_NAMESPACE, null, null, null, null, null, null);
+            System.out.println("v1Status == " + apiResponse.getStatusCode());
+            V1Secret secret = api.createNamespacedSecret(Constant.TKEEL_ALARM_NAMESPACE, v1Secret, null, null, null, null);
         } catch (ApiException e) {
             e.printStackTrace();
-        }catch (IOException io){
+        } catch (IOException io) {
             io.printStackTrace();
         }
         //遍历所有规则
@@ -775,24 +789,26 @@ public class RuleServiceImpl implements RuleService {
 
     /**
      * 从字符串中解析并转化为NoticeId
+     *
      * @param ids
      * @return
      */
-    private List<Long> getNoticeId(String ids){
+    private List<Long> getNoticeId(String ids) {
         List<Long> noticeIds = new ArrayList<>();
-        if(ids.contains(",")){
+        if (ids.contains(",")) {
             String[] idsArray = ids.split(",");
-            for(String id : idsArray){
+            for (String id : idsArray) {
                 noticeIds.add(Long.valueOf(id));
             }
-        }else {
+        } else {
             noticeIds.add(Long.valueOf(ids));
         }
-        return  noticeIds;
+        return noticeIds;
     }
 
     /**
      * 转base64
+     *
      * @param filePath
      * @return
      */
@@ -812,10 +828,11 @@ public class RuleServiceImpl implements RuleService {
 
     /**
      * 规则配置
+     *
      * @param rule
      * @return
      */
-    public  static V1PrometheusRule getRuleConfig(RuleParamVo rule){
+    public static V1PrometheusRule getRuleConfig(RuleParamVo rule) {
         V1PrometheusRule v1PrometheusRule = new V1PrometheusRule();
         V1ObjectMeta v1ObjectMeta = new V1ObjectMeta();
         Map<String, String> annotations = new HashMap<>();
@@ -825,38 +842,38 @@ public class RuleServiceImpl implements RuleService {
         labels.put("role", "alert-rules");
         v1ObjectMeta.setAnnotations(annotations);
         v1ObjectMeta.setLabels(labels);
-        v1ObjectMeta.setName(Constant.RULE_NAME_PREFIX+rule.getRuleId());
+        v1ObjectMeta.setName(Constant.RULE_NAME_PREFIX + rule.getRuleId());
         v1ObjectMeta.setNamespace(Constant.TKEEL_ALARM_NAMESPACE);
 
-        V1PrometheusRuleSpec v1PrometheusRuleSpec =new V1PrometheusRuleSpec();
-        List<V1PrometheusRuleSpecGroups> v1PrometheusRuleSpecGroupsList =new ArrayList<>();
+        V1PrometheusRuleSpec v1PrometheusRuleSpec = new V1PrometheusRuleSpec();
+        List<V1PrometheusRuleSpecGroups> v1PrometheusRuleSpecGroupsList = new ArrayList<>();
         V1PrometheusRuleSpecGroups v1PrometheusRuleSpecGroups = new V1PrometheusRuleSpecGroups();
         v1PrometheusRuleSpecGroups.setName(Constant.GROUP_NAME);
-        List<V1PrometheusRuleSpecRules> v1PrometheusRuleSpecRulesList =new ArrayList<>();
-        V1PrometheusRuleSpecRules v1PrometheusRuleSpecRules =new V1PrometheusRuleSpecRules();
-        Map<String,String> rulesAnnotations =new HashMap<>();
-        rulesAnnotations.put("description",rule.getRuleDesc());
+        List<V1PrometheusRuleSpecRules> v1PrometheusRuleSpecRulesList = new ArrayList<>();
+        V1PrometheusRuleSpecRules v1PrometheusRuleSpecRules = new V1PrometheusRuleSpecRules();
+        Map<String, String> rulesAnnotations = new HashMap<>();
+        rulesAnnotations.put("description", rule.getRuleDesc());
 
-        Map<String,String> rulesLabels =new HashMap<>();
+        Map<String, String> rulesLabels = new HashMap<>();
         String status = "";
-        if(rule.getAlarmLevel() == 1){
+        if (rule.getAlarmLevel() == 1) {
             status = "紧急告警";
-        }else if(rule.getAlarmLevel() == 2){
+        } else if (rule.getAlarmLevel() == 2) {
             status = "重要告警";
-        }else if(rule.getAlarmLevel() == 3){
+        } else if (rule.getAlarmLevel() == 3) {
             status = "次要告警";
-        }else if(rule.getAlarmLevel() == 4){
+        } else if (rule.getAlarmLevel() == 4) {
             status = "告警提示";
         }
-        rulesLabels.put("status",status);
-        rulesLabels.put("alarmValue","{{$value}}");
-        rulesLabels.put("tenantId",rule.getTenantId());
-        rulesLabels.put("ruleId",String.valueOf(rule.getRuleId()));
-        rulesLabels.put("alarmLevel",rule.getAlarmLevel().toString());
-        rulesLabels.put("alarmSource",rule.getAlarmSourceObject().toString());
-        rulesLabels.put("alarmStrategy",rule.getAlarmRuleType().toString());
-        rulesLabels.put("alarmType",rule.getAlarmType().toString());
-        rulesLabels.put("objectId",rule.getDeviceId());
+        rulesLabels.put("status", status);
+        rulesLabels.put("alarmValue", "{{$value}}");
+        rulesLabels.put("tenantId", rule.getTenantId());
+        rulesLabels.put("ruleId", String.valueOf(rule.getRuleId()));
+        rulesLabels.put("alarmLevel", rule.getAlarmLevel().toString());
+        rulesLabels.put("alarmSource", rule.getAlarmSourceObject().toString());
+        rulesLabels.put("alarmStrategy", rule.getAlarmRuleType().toString());
+        rulesLabels.put("alarmType", rule.getAlarmType().toString());
+        rulesLabels.put("objectId", rule.getDeviceId());
         v1PrometheusRuleSpecRules.setAnnotations(rulesAnnotations);
         v1PrometheusRuleSpecRules.setLabels(rulesLabels);
         v1PrometheusRuleSpecRules.setExpr(rule.getPromQl());
