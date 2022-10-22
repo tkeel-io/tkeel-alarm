@@ -2,17 +2,20 @@ name: Docker Image CI
 
 on:
   push:
-    tags:
-    - 'v*'
+    branches:
+      - master
+      - main
+      - dev
+  pull_request:
+    branches:
+      - master
+      - main    
+    
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    
     - name: Get version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
@@ -37,6 +40,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: tkeelio/tkeel-alarm:${{ steps.get_version.outputs.VERSION }}
-    
-    
+        tags: tkeelio/tkeel-alarm:${{ github.head_ref }}.${{ github.sha }}
+        
