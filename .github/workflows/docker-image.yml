@@ -37,6 +37,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: tkeelio/core:${{ steps.get_version.outputs.VERSION }}
+        tags: tkeelio/tkeel-alarm:${{ steps.get_version.outputs.VERSION }}
     
     
