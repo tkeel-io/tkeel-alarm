@@ -53,7 +53,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: tkeelio/tkeel-alarm:${{ steps.git_branch.outputs.VERSION }}.${{GITHUB_SHA_SHORT}}
-        
+        tags: tkeelio/tkeel-alarm:${{ steps.git_branch.outputs.VERSION }}.$GITHUB_SHA_SHORT
         
         
