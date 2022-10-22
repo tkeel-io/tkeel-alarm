@@ -42,6 +42,12 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
+    - name: Set env
+      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+    
+    - name: Test
+      run: echo $GITHUB_SHA_SHORT 
+      
     - name: Build and push
       uses: docker/build-push-action@v2
       env:
@@ -50,8 +56,6 @@ jobs:
         context: .
         push: true
         tags: tkeelio/tkeel-alarm:${{ steps.git_branch.outputs.VERSION }}.${{GITHUB_SHA_SHORT}}
-        
-
         
         
         
