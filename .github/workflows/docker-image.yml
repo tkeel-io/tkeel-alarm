@@ -16,12 +16,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    
     - name: Get version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-    
-    - name: Checkout
-      uses: actions/checkout@v2
+
+    - name: Get Branch
+      id: branch
+      run: echo "git_branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_BRANCH
+
+    - name: Check Branch
+      run: echo "${{ env.branch }}"
+
+    - name: Get Hash
+      id: hash
+      run: echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
+
+    - name: Check Hash
+      run: echo "${{ env.hash }}"
     
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
@@ -40,5 +54,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: tkeelio/tkeel-alarm:${GITHUB_SHA::6}
+        tags: tkeelio/tkeel-alarm:${{ env.branch }}.${{ env.hash }}
         
