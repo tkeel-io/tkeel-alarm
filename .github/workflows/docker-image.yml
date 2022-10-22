@@ -40,5 +40,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: tkeelio/tkeel-alarm:${{ github.sha::6 }}
+        tags: tkeelio/tkeel-alarm:${GITHUB_SHA::6}
         
