@@ -50,8 +50,6 @@ jobs:
       
     - name: Build and push
       uses: docker/build-push-action@v2
-      env:
-        GITHUB_SHA_SHORT: ${{ $(echo $GITHUB_SHA | cut -c 1-6) }}
       with:
         context: .
         push: true
