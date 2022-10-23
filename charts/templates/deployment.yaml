@@ -60,6 +60,10 @@ spec:
               value: "core-pub"
             - name: KAFKA_SERVICE
               value: "tkeel-middleware-kafka:9092"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http

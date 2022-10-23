@@ -34,6 +34,7 @@ import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.util.Config;
 import org.ho.yaml.Yaml;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,6 +56,9 @@ public class RuleServiceImpl implements RuleService {
     private MailMapper mailMapper;
     @Autowired
     private CRDService crdService;
+
+    @Value("${POD_NAMESPACE}")
+    private String PodNamespace;
 
     @Override
     public PageInfo<Rule> queryRuleList(RuleParamVo ruleParamVo) {
@@ -590,11 +594,11 @@ public class RuleServiceImpl implements RuleService {
      * @return
      */
     public int setAlertManagerSecret() {
-        int ret =0;
-        for(String name:Constant.ALERT_MANAGER_NAME){
-            ret +=setAlertManagerSecret(name);
+        int ret = 0;
+        for (String name : Constant.ALERT_MANAGER_NAME) {
+            ret += setAlertManagerSecret(name);
         }
-        return ret>0?1:0;
+        return ret > 0 ? 1 : 0;
     }
 
     public int setAlertManagerSecret(String secretName) {
@@ -638,16 +642,14 @@ public class RuleServiceImpl implements RuleService {
         List<WebhookConfig> webhookConfigsList = new ArrayList<>();
         WebhookConfig webhookConfig = new WebhookConfig();
         webhookConfig.setSend_resolved(true);
-        webhookConfig.setUrl("http://tkeel-alarm.keel-system.svc:31239/webhook/demo");
-        webhookConfig = new WebhookConfig();
-        webhookConfig.setSend_resolved(true);
-        webhookConfig.setUrl("http://tkeel-alarm.dapr-system.svc:31239/webhook/demo");
+        webhookConfig.setUrl("http://tkeel-alarm." + PodNamespace + ".svc:31239/webhook/demo");
         webhookConfigsList.add(webhookConfig);
 
         Receiver receiver2 = new Receiver();
         receiver2.setName("prometheus");
         List<WebhookConfig> webhookConfigsList2 = new ArrayList<>();
         WebhookConfig webhookConfig2 = new WebhookConfig();
+        webhookConfig2.setSend_resolved(true);
         webhookConfig2.setSend_resolved(true);
         webhookConfig2.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
         webhookConfigsList2.add(webhookConfig2);
