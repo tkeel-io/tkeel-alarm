@@ -1,0 +1,17 @@
+--- !com.alarm.tkeel.crd.alertmanager.AlertEntity
+global: !com.alarm.tkeel.crd.alertmanager.Global
+  resolve_timeout: 5m
+  smtp_auth_password: ''
+  smtp_auth_username: ''
+  smtp_from: ''
+  smtp_smarthost: ""
+receivers: 
+  - !com.alarm.tkeel.crd.alertmanager.Receiver
+    name: default
+route: !com.alarm.tkeel.crd.alertmanager.Route
+  group_by: !java.lang.String[]
+    - ruleId
+  group_interval: 10s
+  group_wait: 10s
+  receiver: default
+  repeat_interval: 1m

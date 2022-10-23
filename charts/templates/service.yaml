@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tkeel-alarm.fullname" . }}
+  labels:
+    {{- include "tkeel-alarm.labels" . | nindent 4 }}
+    tkeel.io/prometheus: 'true'
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "tkeel-alarm.name" . }}
