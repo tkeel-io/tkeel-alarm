@@ -53,6 +53,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: tkeelio/tkeel-alarm:pr${{ github.event.pull_request.id }}-${{ steps.git_sha.outputs.GITHUB_SHA_SHORT }}
+        tags: tkeelio/tkeel-alarm:pr${{ github.event.pull_request.number }}-${{ steps.git_sha.outputs.GITHUB_SHA_SHORT }}
         
         
