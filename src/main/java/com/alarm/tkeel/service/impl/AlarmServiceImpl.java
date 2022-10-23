@@ -35,7 +35,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Override
     public int countPendingRecord(AlarmRecord alarmRecord) {
-        System.out.println("countPendingRecord===="+alarmRecord.getAlarmHash());
+        System.out.println("countPendingRecord===="+alarmRecord.getRecordHash());
         return alarmMapper.countPendingRecord(alarmRecord);
     }
 

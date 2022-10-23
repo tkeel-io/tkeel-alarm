@@ -90,8 +90,8 @@
     <select id="countPendingRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="java.lang.Integer">
         SELECT COUNT(0)
         FROM tkeel_alarm_record where (alarm_status = 0)
-        <if test="alarmHash != null">
-            and alarm_hash = #{alarmHash}
+        <if test="recordHash != null">
+            and record_hash = #{recordHash}
         </if>
     </select>
 

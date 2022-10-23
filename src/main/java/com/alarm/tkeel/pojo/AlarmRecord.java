@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 public class AlarmRecord implements Serializable {
     private Long alarmId;
-    private String alarmHash;
+    private String recordHash;
     private Long ruleId;
 //    private String alarmEventId;
     private String tenantId;

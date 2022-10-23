@@ -54,7 +54,10 @@ public class WebHookController {
                 alarmRecord.setDeleted(0);
                 alarmRecord.setAlarmValue(alert.getLabels().getAlarmValue());
                 alarmRecord.setRuleId(alert.getLabels().getRuleId());
-                alarmRecordList.add(alarmRecord);
+                alarmRecord.setRecordHash(alarmRecord.getRuleId() + "-" + alarmRecord.getTenantId() + "-" + alarmRecord.getObjectId());
+                if(alarmService.countPendingRecord(alarmRecord)==0){
+                    alarmRecordList.add(alarmRecord);
+                }
             }
            // 此处批量新增告警记录
             if(alarmRecordList != null || alarmRecordList.size() > 0){
