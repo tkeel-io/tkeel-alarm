@@ -638,10 +638,10 @@ public class RuleServiceImpl implements RuleService {
         List<WebhookConfig> webhookConfigsList = new ArrayList<>();
         WebhookConfig webhookConfig = new WebhookConfig();
         webhookConfig.setSend_resolved(true);
-        webhookConfig.setUrl("http://tkeel-alarm.keel-system:31239/webhook/demo");
+        webhookConfig.setUrl("http://tkeel-alarm.keel-system.svc:31239/webhook/demo");
         webhookConfig = new WebhookConfig();
         webhookConfig.setSend_resolved(true);
-        webhookConfig.setUrl("http://tkeel-alarm.dapr-system:31239/webhook/demo");
+        webhookConfig.setUrl("http://tkeel-alarm.dapr-system.svc:31239/webhook/demo");
         webhookConfigsList.add(webhookConfig);
 
         Receiver receiver2 = new Receiver();
@@ -691,7 +691,7 @@ public class RuleServiceImpl implements RuleService {
             List<EmailAddressVo> noticeGroups = mailMapper.queryEmailAddress(noticeIds);
             if (noticeGroups == null) {
                 System.out.println("setAlertManagerSecret emailList == null");
-                return 0;
+                continue;
             }
             routes.setReceiver(String.valueOf(rule.getRuleId()));
 //            routes.setGroup_by(new String[]{"ruleId"});
@@ -965,5 +965,6 @@ public class RuleServiceImpl implements RuleService {
 //
 //        return routesList;
 //    }
+
 }
 
