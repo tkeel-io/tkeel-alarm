@@ -11,10 +11,10 @@ import java.io.Serializable;
  */
 @Data
 public class AlarmRecord implements Serializable {
+    private Long eventId;
     private Long alarmId;
     private String recordHash;
     private Long ruleId;
-//    private String alarmEventId;
     private String tenantId;
     private String alarmName;
     private Integer alarmLevel;
@@ -27,8 +27,8 @@ public class AlarmRecord implements Serializable {
     private Long handTime;
     private Integer alarmStatus;
     private String handOpinions;
-    private String alarmDesc;
     private String alarmValue;
+    private String alarmDesc;
     private Integer deleted;
 
 }

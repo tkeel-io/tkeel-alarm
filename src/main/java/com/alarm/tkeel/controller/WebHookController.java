@@ -33,12 +33,16 @@ public class WebHookController {
         System.out.println(JSON.toJSONString("result===="+result));
         if (result.getStatus() != null && result.getStatus().equals("firing")) {
             List<Alert> alertList = result.getAlerts();
-            List<AlarmRecord> alarmRecordList =new ArrayList<>();
+            Map<String,List<AlarmRecord>> alarmEventMap =new HashMap<>();
             for (Alert alert : alertList) {
                 if(alert.getLabels().getRuleId() == null){
                     System.out.println("规则ID为空，非设备告警，忽略！");
                     continue;
                 }
+
+                String recordHash = alert.getLabels().getRuleId() + "-" + alert.getLabels().getTenantId() + "-" + alert.getLabels().getObjectId();
+                List<AlarmRecord> alarmEventList = alarmEventMap.getOrDefault(recordHash, new ArrayList<AlarmRecord>());
+
                 AlarmRecord alarmRecord =new AlarmRecord();
                 alarmRecord.setAlarmName(alert.getLabels().getAlertname());
                 alarmRecord.setAlarmLevel(alert.getLabels().getAlarmLevel());
@@ -54,15 +58,20 @@ public class WebHookController {
                 alarmRecord.setDeleted(0);
                 alarmRecord.setAlarmValue(alert.getLabels().getAlarmValue());
                 alarmRecord.setRuleId(alert.getLabels().getRuleId());
-                alarmRecord.setRecordHash(alarmRecord.getRuleId() + "-" + alarmRecord.getTenantId() + "-" + alarmRecord.getObjectId());
-                if(alarmService.countPendingRecord(alarmRecord)==0){
-                    alarmRecordList.add(alarmRecord);
-                }
+                alarmRecord.setRecordHash(recordHash);
+                alarmEventList.add(alarmRecord);
             }
-           // 此处批量新增告警记录
-            if(alarmRecordList != null || alarmRecordList.size() > 0){
-                System.out.println("alarmRecordList ====== "+JSON.toJSONString(alarmRecordList));
-                alarmService.createAlarmRecord(alarmRecordList);
+
+            for (Map.Entry<String,List<AlarmRecord>> entry : alarmEventMap.entrySet()){
+                String recordHash = entry.getKey();
+                if (entry.getValue().size() <=0){
+                    continue;
+                }
+                AlarmRecord alarmRecord = entry.getValue().get(0);
+                if(alarmService.countPendingRecord(alarmRecord)==0){
+                    Long id = alarmService.createAlarmRecord(alarmRecord);
+                }
+                alarmService.createAlarmEvent(entry.getValue());
             }
         }else {
             System.out.println("result.getStatus() ========= " +result.getStatus());

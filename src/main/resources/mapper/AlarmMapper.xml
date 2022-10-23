@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.alarm.tkeel.dao.AlarmMapper">
-    <select id="queryAlarmRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecordParamVo" resultType="com.alarm.tkeel.pojo.AlarmRecord">
+    <select id="queryAlarmRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecordParamVo"
+            resultType="com.alarm.tkeel.pojo.AlarmRecord">
         SELECT * from tkeel_alarm_record where (0=0)
         <if test="alarmId != null">
             and alarm_id = #{alarmId}
@@ -30,7 +31,7 @@
         order by start_time desc
     </select>
 
-    <update id="updateAlarmHandleOpinions" parameterType="com.alarm.tkeel.pojo.AlarmHandle" >
+    <update id="updateAlarmHandleOpinions" parameterType="com.alarm.tkeel.pojo.AlarmHandle">
         update tkeel_alarm_record
         <set>
             <trim suffixOverrides=",">
@@ -48,9 +49,56 @@
         where deleted = 0 and alarm_id = #{alarmId}
     </update>
 
-    <insert id="createAlarmRecord" parameterType="java.util.List">
+    <select id="createAlarmRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="long">
+        insert into tkeel_alarm_record(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
+        values
+            (
+            #{alarmRecords.recordHash},
+            #{alarmRecords.ruleId},
+            #{alarmRecords.tenantId},
+            #{alarmRecords.alarmName},
+            #{alarmRecords.alarmLevel},
+            #{alarmRecords.alarmStrategy},
+            #{alarmRecords.alarmSource},
+            #{alarmRecords.alarmType},
+            #{alarmRecords.objectId},
+            #{alarmRecords.telemetryId},
+            #{alarmRecords.startTime},
+            #{alarmRecords.alarmStatus},
+            #{alarmRecords.alarmValue},
+            #{alarmRecords.alarmDesc},
+            #{alarmRecords.deleted})
+        returing alarm_id
+    </select>
+
+    <select id="queryAlarmCount" resultType="com.alarm.tkeel.pojo.alerts.MetricCount">
+        SELECT tenant_id,COUNT(0) as `count`
+        FROM  tkeel_alarm_record
+        WHERE deleted  = 0 and alarm_source = 1
+        GROUP BY tenant_id
+    </select>
+
+    <select id="queryAlarmLevel" resultType="com.alarm.tkeel.pojo.alerts.MetricCount">
+        SELECT tenant_id,alarm_level,COUNT(0) as `count`
+        FROM  tkeel_alarm_record
+        WHERE deleted  = 0 and alarm_source = 1
+        GROUP BY tenant_id,alarm_level
+    </select>
+
+
+    <select id="countPendingRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="long">
+        SELECT COUNT(0)
+        FROM tkeel_alarm_record where (alarm_status = 0)
+        <if test="recordHash != null">
+            and record_hash = #{recordHash}
+        </if>
+    </select>
+
+
+
+    <insert id="createAlarmEvent" parameterType="java.util.List">
         insert into
-        tkeel_alarm_record(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
+        tkeel_alarm_event(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
         values
         <foreach collection="list" item="alarmRecords" index="index" separator=",">
             (
@@ -71,28 +119,5 @@
             #{alarmRecords.deleted})
         </foreach>
     </insert>
-
-    <select id="queryAlarmCount" resultType="com.alarm.tkeel.pojo.alerts.MetricCount">
-        SELECT tenant_id,COUNT(0) as `count`
-        FROM  tkeel_alarm_record
-        WHERE deleted  = 0 and alarm_source = 1
-        GROUP BY tenant_id
-    </select>
-
-    <select id="queryAlarmLevel" resultType="com.alarm.tkeel.pojo.alerts.MetricCount">
-        SELECT tenant_id,alarm_level,COUNT(0) as `count`
-        FROM  tkeel_alarm_record
-        WHERE deleted  = 0 and alarm_source = 1
-        GROUP BY tenant_id,alarm_level
-    </select>
-
-
-    <select id="countPendingRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="java.lang.Integer">
-        SELECT COUNT(0)
-        FROM tkeel_alarm_record where (alarm_status = 0)
-        <if test="recordHash != null">
-            and record_hash = #{recordHash}
-        </if>
-    </select>
 
 </mapper>

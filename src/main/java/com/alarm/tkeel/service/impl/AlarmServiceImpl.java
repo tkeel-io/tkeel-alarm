@@ -21,30 +21,30 @@ public class AlarmServiceImpl implements AlarmService {
     @Resource
     private AlarmMapper alarmMapper;
     @Autowired
-    private  RuleService ruleService;
+    private RuleService ruleService;
 
 
     @Override
     public PageInfo<AlarmRecord> queryAlarmRecord(AlarmRecordParamVo alarmRecordParamVo) {
         // 设置分页参数; pageNum:页码, pageSize:每页大小
-        PageHelper.startPage(alarmRecordParamVo.getPageNum(),alarmRecordParamVo.getPageSize());
+        PageHelper.startPage(alarmRecordParamVo.getPageNum(), alarmRecordParamVo.getPageSize());
         // 执行sql查询方法查询所有数据, 会自动分页
         List<AlarmRecord> list = alarmMapper.queryAlarmRecord(alarmRecordParamVo);
         return new PageInfo<AlarmRecord>(list);
     }
 
     @Override
-    public int countPendingRecord(AlarmRecord alarmRecord) {
-        System.out.println("countPendingRecord===="+alarmRecord.getRecordHash());
+    public Long countPendingRecord(AlarmRecord alarmRecord) {
+        System.out.println("countPendingRecord====" + alarmRecord.getRecordHash());
         return alarmMapper.countPendingRecord(alarmRecord);
     }
 
     @Override
     public int updateAlarmHandleOpinions(AlarmHandle alarmHandle) {
-        alarmHandle.setHandTime(System.currentTimeMillis()/1000);
+        alarmHandle.setHandTime(System.currentTimeMillis() / 1000);
         alarmHandle.setAlarmStatus(1);
         int code = alarmMapper.updateAlarmHandleOpinions(alarmHandle);
-        if(code > 0) {
+        if (code > 0) {
             // 告警记录被处理后则停用规则对应的规则。
             EnableParamVo enableParamVo = new EnableParamVo();
             enableParamVo.setEnable(0);
@@ -55,7 +55,13 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
-    public int createAlarmRecord(List<AlarmRecord> alarmRecord) {
+    public Long createAlarmRecord(AlarmRecord alarmRecord) {
         return alarmMapper.createAlarmRecord(alarmRecord);
     }
+    @Override
+    public Long createAlarmEvent(List<AlarmRecord> alarmRecord){
+        return alarmMapper.createAlarmEvent(alarmRecord);
+    }
+
+
 }

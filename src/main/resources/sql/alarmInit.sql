@@ -68,7 +68,6 @@ CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_record` (
 
 
 -- `tkeel-alarm`.tkeel_alarm_record definition
-
 CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_event` (
   `event_id` bigint NOT NULL AUTO_INCREMENT,
   `alarm_id` bigint NOT NULL,
