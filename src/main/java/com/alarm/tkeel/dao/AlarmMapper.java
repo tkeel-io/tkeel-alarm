@@ -10,6 +10,8 @@ public interface AlarmMapper {
 
     List<AlarmRecord> queryAlarmRecord(AlarmRecordParamVo alarmRecordParamVo);
 
+    int countPendingRecord(AlarmRecord alarmRecord);
+
     int updateAlarmHandleOpinions(AlarmHandle alarmHandle);
 
     int createAlarmRecord(List<AlarmRecord> alarmRecord);

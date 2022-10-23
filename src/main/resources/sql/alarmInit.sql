@@ -46,6 +46,7 @@ CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_rule` (
 
 CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_record` (
   `alarm_id` bigint NOT NULL AUTO_INCREMENT,
+  `alarm_hash` varchar(100) NOT NULL,
   `rule_id` varchar(100) NOT NULL,
   `tenant_id` varchar(20) NOT NULL,
   `alarm_name` varchar(50) NOT NULL,

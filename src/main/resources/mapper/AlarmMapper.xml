@@ -50,10 +50,11 @@
 
     <insert id="createAlarmRecord" parameterType="java.util.List">
         insert into
-        tkeel_alarm_record(rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
+        tkeel_alarm_record(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
         values
         <foreach collection="list" item="alarmRecords" index="index" separator=",">
             (
+            #{alarmRecords.recordHash},
             #{alarmRecords.ruleId},
             #{alarmRecords.tenantId},
             #{alarmRecords.alarmName},
@@ -83,6 +84,15 @@
         FROM  tkeel_alarm_record
         WHERE deleted  = 0 and alarm_source = 1
         GROUP BY tenant_id,alarm_level
+    </select>
+
+
+    <select id="countPendingRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="java.lang.Integer">
+        SELECT COUNT(0)
+        FROM tkeel_alarm_record where (alarm_status = 0)
+        <if test="alarmHash != null">
+            and alarm_hash = #{alarmHash}
+        </if>
     </select>
 
 </mapper>
