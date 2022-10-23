@@ -44,15 +44,19 @@ jobs:
     
     - name: Set env
       run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+      
+    - name: Get Hash
+      id: git_sha
+      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_OUTPUT 
     
-    - name: Test
-      run: echo ${{ env.github_sha_short }}
+    - name: Test Tag
+      run: echo tkeelio/tkeel-alarm:${{ steps.git_branch.outputs.VERSION }}-${{ steps.git_sha.outputs.GITHUB_SHA_SHORT }}  
       
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
         context: .
         push: true
-        tags: tkeelio/tkeel-alarm:${{ steps.git_branch.outputs.VERSION }}.${{ env.github_sha_short }}
+        tags: tkeelio/tkeel-alarm:${{ steps.git_branch.outputs.VERSION }}-${{ steps.git_sha.outputs.GITHUB_SHA_SHORT }}  
         
         
