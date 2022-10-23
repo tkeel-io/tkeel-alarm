@@ -1,11 +1,11 @@
 package com.alarm.tkeel.service.impl;
 
 import com.alarm.tkeel.dao.AlarmMapper;
-import com.alarm.tkeel.dao.PortalAlarmMapper;
-import com.alarm.tkeel.pojo.*;
+import com.alarm.tkeel.pojo.AlarmHandle;
+import com.alarm.tkeel.pojo.AlarmRecord;
+import com.alarm.tkeel.pojo.AlarmRecordParamVo;
 import com.alarm.tkeel.pojo.rules.EnableParamVo;
 import com.alarm.tkeel.service.AlarmService;
-import com.alarm.tkeel.service.PortalAlarmService;
 import com.alarm.tkeel.service.RuleService;
 import com.alarm.tkeel.utils.PageInfo;
 import com.github.pagehelper.PageHelper;
@@ -31,6 +31,12 @@ public class AlarmServiceImpl implements AlarmService {
         // 执行sql查询方法查询所有数据, 会自动分页
         List<AlarmRecord> list = alarmMapper.queryAlarmRecord(alarmRecordParamVo);
         return new PageInfo<AlarmRecord>(list);
+    }
+
+    @Override
+    public int countPendingRecord(AlarmRecord alarmRecord) {
+        System.out.println("countPendingRecord===="+alarmRecord.getRecordHash());
+        return alarmMapper.countPendingRecord(alarmRecord);
     }
 
     @Override

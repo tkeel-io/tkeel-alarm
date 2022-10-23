@@ -46,6 +46,7 @@ CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_rule` (
 
 CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_record` (
   `alarm_id` bigint NOT NULL AUTO_INCREMENT,
+  `alarm_hash` varchar(100) NOT NULL,
   `rule_id` varchar(100) NOT NULL,
   `tenant_id` varchar(20) NOT NULL,
   `alarm_name` varchar(50) NOT NULL,
@@ -64,6 +65,30 @@ CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_record` (
   `deleted` int NOT NULL DEFAULT '0' COMMENT '是否删除',
   PRIMARY KEY (`alarm_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=60000 DEFAULT CHARSET=utf8mb3;
+
+
+-- `tkeel-alarm`.tkeel_alarm_record definition
+
+CREATE TABLE if not exists `tkeel-alarm`.`tkeel_alarm_event` (
+  `event_id` bigint NOT NULL AUTO_INCREMENT,
+  `alarm_id` bigint NOT NULL,
+  `rule_id` varchar(100) NOT NULL,
+  `tenant_id` varchar(20) NOT NULL,
+  `alarm_name` varchar(50) NOT NULL,
+  `alarm_level` int NOT NULL,
+  `alarm_strategy` int NOT NULL,
+  `alarm_source` varchar(20) NOT NULL,
+  `alarm_type` int NOT NULL,
+  `object_id` varchar(50) DEFAULT NULL,
+  `telemetry_id` varchar(20) DEFAULT NULL,
+  `start_time` bigint NOT NULL,
+  `hand_time` bigint DEFAULT NULL,
+  `alarm_status` int NOT NULL,
+  `alarm_value` varchar(20) NOT NULL COMMENT '告警上报值',
+  `alarm_desc` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=60000 DEFAULT CHARSET=utf8mb3;
+
 
 
 -- `tkeel-alarm`.tkeel_alarm_rule_desc definition
