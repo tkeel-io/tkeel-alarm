@@ -63,5 +63,18 @@ public class AlarmServiceImpl implements AlarmService {
         return alarmMapper.createAlarmEvent(alarmRecord);
     }
 
+    @Override
+    public int updateAlarmEventAlarmID(AlarmRecord alarmRecord) {
+        if(alarmRecord.getAlarmId() == 0){
+            System.out.println("[Error]updateAlarmEventAlarmID AlarmId is empty");
+            return -1;
+        }
+        if(alarmRecord.getRecordHash().isEmpty()){
+            System.out.println("[Error]updateAlarmEventAlarmID RecordHash is empty");
+            return -1;
+        }
+        int code = alarmMapper.updateAlarmEventAlarmID(alarmRecord);
+        return code;
+    }
 
 }

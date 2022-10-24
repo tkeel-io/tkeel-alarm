@@ -49,6 +49,7 @@
         where deleted = 0 and alarm_id = #{alarmId}
     </update>
 
+
     <select id="createAlarmRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="long">
         insert into tkeel_alarm_record(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
         values
@@ -119,5 +120,17 @@
             #{alarmRecords.deleted})
         </foreach>
     </insert>
+
+    <update id="updateAlarmEventAlarmID" parameterType="com.alarm.tkeel.pojo.AlarmRecord">
+        update tkeel_alarm_event
+        <set>
+            <trim suffixOverrides=",">
+                <if test="alarmId != null">
+                    alarm_id = #{alarmId},
+                </if>
+            </trim>
+        </set>
+        where alarm_id = 0 and record_hash = #{recordHash}
+    </update>
 
 </mapper>

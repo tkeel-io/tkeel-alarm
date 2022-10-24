@@ -18,4 +18,5 @@ public interface AlarmService {
 
     Long createAlarmEvent(List<AlarmRecord> alarmRecord);
 
+    int updateAlarmEventAlarmID(AlarmRecord alarmRecord);
 }

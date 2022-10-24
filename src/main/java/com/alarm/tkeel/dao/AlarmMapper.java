@@ -18,6 +18,8 @@ public interface AlarmMapper {
 
     Long createAlarmEvent(List<AlarmRecord> alarmRecord);
 
+    int updateAlarmEventAlarmID(AlarmRecord alarmRecord);
+
     List<MetricCount> queryAlarmCount();
 
     List<MetricCount> queryAlarmLevel();
