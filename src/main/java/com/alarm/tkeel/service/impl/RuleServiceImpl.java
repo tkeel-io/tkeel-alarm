@@ -6,7 +6,6 @@ import com.alarm.tkeel.dao.RuleMapper;
 import com.alarm.tkeel.pojo.PortalRuleDesc;
 import com.alarm.tkeel.pojo.mail.Email;
 import com.alarm.tkeel.pojo.mail.EmailAddressVo;
-import com.alarm.tkeel.pojo.mail.NoticeGroup;
 import com.alarm.tkeel.pojo.notify.DeviceStatus;
 import com.alarm.tkeel.pojo.notify.RuleId;
 import com.alarm.tkeel.pojo.notify.TelemetryStatus;
@@ -32,7 +31,10 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1Secret;
 import io.kubernetes.client.openapi.models.V1Status;
 import io.kubernetes.client.util.Config;
+import org.apache.logging.log4j.util.Strings;
 import org.ho.yaml.Yaml;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,9 +45,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+//import io.fabric8.openshift.api.model.monitoring.v1alpha1.Receiver;
 
 @Service
 public class RuleServiceImpl implements RuleService {
@@ -74,7 +80,7 @@ public class RuleServiceImpl implements RuleService {
         int code = 0;
         int result = ruleMapper.setNotice(updateNoticeParam);
         if (result > 0) {
-            code = setAlertManagerSecret();
+            code = updateAlertManagerSecret();
         } else {
             return 0;
         }
@@ -91,14 +97,14 @@ public class RuleServiceImpl implements RuleService {
 //            updateNoticeParamVo.setNoticeId(null);
 //            int res = ruleMapper.setNotice(updateNoticeParamVo);
 //            if(res > 0 ) {
-//               setAlertManagerSecret();
+//               updateAlertManagerSecret();
 //            }else {
 //                System.out.println("setEnable-setNotice error");
 //                return 0;
 //            }
 //        }
         // 重新设置通知配置
-        setAlertManagerSecret();
+        updateAlertManagerSecret();
         if (result > 0) {
             //此处需要调用CRD接口配置规则
             RuleParamVo rule = ruleMapper.queryRuleByCRD(enableParamVo.getRuleId());
@@ -512,6 +518,7 @@ public class RuleServiceImpl implements RuleService {
 
     /**
      * 设置告警规则通知CR
+     *
      * @return
      */
 //    private int setAlertManagerCR(UpdateNoticeParamVo updateNoticeParamVo){
@@ -587,38 +594,221 @@ public class RuleServiceImpl implements RuleService {
 //        System.out.println("createAlertManagerCR code = "+code);
 //        return code;
 //    }
+    public int updateAlertManagerSecret() {
+        //构造secret
+        AlertEntity alertEntity = genAlertEntity();
 
-    /**
-     * 设置AlertManager告警通知Secret
-     *
-     * @return
-     */
-    public int setAlertManagerSecret() {
-        int ret = 0;
+        // 循环 UpdateSecret
         for (String name : Constant.ALERT_MANAGER_NAME) {
-            ret += setAlertManagerSecret(name);
+            UpdateSecret(name, alertEntity);
         }
-        return ret > 0 ? 1 : 0;
+        return 0;
     }
 
-    public int setAlertManagerSecret(String secretName) {
+    public AlertEntity genAlertEntity() {
+        AlertEntity alertEntity = new AlertEntity();
+        UpdateEntityGlobal(alertEntity);
+
         List<Rule> ruleList = ruleMapper.queryAllRule();
-        Email email = mailMapper.queryMailConfig();
         if (ruleList == null) {
-            System.out.println("setAlertManagerSecret Rule == null");
-            return 0;
+            ruleList = new ArrayList<>();
         }
-        if (email == null) {
-            System.out.println("setAlertManagerSecret email == null");
-            return 0;
+
+        UpdateEntityRoute(alertEntity, ruleList);
+        UpdateEntityReceivers(alertEntity, ruleList);
+        return alertEntity;
+    }
+
+
+    private void UpdateEntityGlobal(AlertEntity alertEntity) {
+        Email email = mailMapper.queryMailConfig();
+        if (email != null) {
+            Global global = new Global();
+            global.setResolve_timeout("5m");
+            global.setSmtp_smarthost(email.getSmtpAddress() + ":" + email.getPort());
+            global.setSmtp_auth_username(email.getSmtpUserName());
+            global.setSmtp_auth_password(email.getSmtpPassWord());
+            global.setSmtp_from(email.getFromAddress());
+            global.setSmtp_require_tls(email.getSsl() == 1 ? true : false);
+            alertEntity.setGlobal(global);
         }
-        Global global = new Global();
-        global.setResolve_timeout("5m");
-        global.setSmtp_smarthost(email.getSmtpAddress() + ":" + email.getPort());
-        global.setSmtp_auth_username(email.getSmtpUserName());
-        global.setSmtp_auth_password(email.getSmtpPassWord());
-        global.setSmtp_from(email.getFromAddress());
-        global.setSmtp_require_tls(email.getSsl() == 1 ? true : false);
+    }
+
+    private void UpdateEntityRoute(AlertEntity alertEntity, List<Rule> ruleList) {
+        List<Routes> routesList = new ArrayList<>();
+        //Kubesphere config
+        UpdateKubesphereRoute(routesList);
+
+        for (Rule rule : ruleList) {
+            Routes routes = new Routes();
+            routes.setReceiver(rule.getRuleId().toString());
+            Map<String, String> match_map = new HashMap<>();
+//                match_map.put("tenant_id", rule.getTenantId());
+//                match_map.put("rule_id", rule.getRuleId().toString());
+            match_map.put("tenantId", rule.getTenantId());
+            match_map.put("ruleId", String.valueOf(rule.getRuleId()));
+            routes.setMatch(match_map);
+
+            routesList.add(routes);
+        }
+
+        Route route = new Route();
+        route.setReceiver("default-receiver");
+        route.setGroup_wait("5s");
+        route.setGroup_interval("5s");
+        route.setRepeat_interval("5s");
+//        route.setGroup_interval("5m");
+//        route.setRepeat_interval("3h");
+//        route.setGroup_wait("30s");
+        route.setGroup_by(new String[]{"ruleId"});
+        route.setRoutes(routesList);
+        alertEntity.setRoute(route);
+
+    }
+
+    private static void UpdateKubesphereRoute(List<Routes> routesList) {
+
+        Routes prometheusRoutes = new Routes();
+        Routes eventRoutes = new Routes();
+        Routes auditingRoutes = new Routes();
+
+        Map<String, String> prometheus_map = new HashMap<>();
+        Map<String, String> event_map = new HashMap<>();
+        Map<String, String> auditing_map = new HashMap<>();
+        prometheus_map.put("alerttype", ".*");
+        event_map.put("alerttype", "event");
+        auditing_map.put("alerttype", "auditing");
+
+        prometheusRoutes.setReceiver("prometheus");
+        prometheusRoutes.setMatch_re(prometheus_map);
+//        prometheusRoutes.setContinueText(false);
+
+        eventRoutes.setReceiver("event");
+        eventRoutes.setMatch(event_map);
+//        eventRoutes.setContinueText(false);
+        eventRoutes.setGroup_interval("30s");
+
+        auditingRoutes.setReceiver("auditing");
+        auditingRoutes.setMatch(auditing_map);
+//        auditingRoutes.setContinueText(false);
+        auditingRoutes.setGroup_interval("30s");
+
+        routesList.add(prometheusRoutes);
+        routesList.add(eventRoutes);
+        routesList.add(auditingRoutes);
+
+    }
+
+    private void UpdateEntityReceivers(AlertEntity alertEntity, List<Rule> ruleList) {
+
+        List<Receiver> receiverList = new ArrayList<>();
+
+        Receiver receiver1 = new Receiver();
+        receiver1.setName("default");
+//        List<WebhookConfig> webhookConfigsList = new ArrayList<>();
+//        WebhookConfig webhookConfig = new WebhookConfig();
+//        webhookConfig.setSend_resolved(true);
+//        webhookConfig.setUrl("http://tkeel-alarm." + PodNamespace + ".svc:31239/webhook/demo");
+//        webhookConfigsList.add(webhookConfig);
+//        receiver1.setWebhook_configs(webhookConfigsList);
+//        receiverList.add(receiver1);
+
+        for (Rule rule : ruleList) {
+            Receiver receiver = new Receiver();
+            receiver.setName(String.valueOf(rule.getRuleId()));
+            //Add webhook
+            receiver.setWebhook_configs(getWebhookConfigs());
+
+            //Add email
+            List<EmailConfig> emailConfigList = new ArrayList<>();
+            String emailList = getEmailList(rule);
+            if (emailList.isEmpty()) continue;
+            EmailConfig emailConfig = new EmailConfig();
+            emailConfig.setTo(emailList);
+            emailConfig.setSend_resolved(true);
+            emailConfigList.add(emailConfig);
+            receiver.setEmail_configs(emailConfigList);
+
+            receiverList.add(receiver);
+        }
+
+        UpdateKubesphereReciver(receiverList);
+        alertEntity.setReceivers(receiverList);
+    }
+
+    @Nullable
+    private String getEmailList(Rule rule) {
+        List<Long> noticeIds = getNoticeId(rule.getNoticeId());
+        List<EmailAddressVo> noticeGroups = mailMapper.queryEmailAddress(noticeIds);
+        if (noticeGroups == null) {
+            System.out.println("updateAlertManagerSecret emailList == null");
+            return null;
+        }
+
+        List<String> emailList = new ArrayList<>();
+        for (EmailAddressVo notice : noticeGroups) {
+            if (rule.getNoticeId().contains(notice.getNoticeId().toString())) {
+                emailList.add(notice.getEmailAddress());
+            }
+        }
+        return Strings.join(emailList, ',');
+    }
+
+    //Kubesphere config
+    private static void UpdateKubesphereReciver(List<Receiver> receiverList) {
+        Receiver receiver2 = new Receiver();
+        receiver2.setName("prometheus");
+        List<WebhookConfig> webhookConfigsList2 = new ArrayList<>();
+        WebhookConfig webhookConfig2 = new WebhookConfig();
+        webhookConfig2.setSend_resolved(true);
+        webhookConfig2.setSend_resolved(true);
+        webhookConfig2.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+        webhookConfigsList2.add(webhookConfig2);
+        receiver2.setWebhook_configs(webhookConfigsList2);
+        receiverList.add(receiver2);
+
+        Receiver receiver3 = new Receiver();
+        receiver3.setName("event");
+        List<WebhookConfig> webhookConfigsList3 = new ArrayList<>();
+        WebhookConfig webhookConfig3 = new WebhookConfig();
+        webhookConfig3.setSend_resolved(false);
+        webhookConfig3.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+        webhookConfigsList3.add(webhookConfig3);
+        receiver3.setWebhook_configs(webhookConfigsList3);
+        receiverList.add(receiver3);
+
+        Receiver receiver4 = new Receiver();
+        receiver4.setName("auditing");
+        List<WebhookConfig> webhookConfigsList4 = new ArrayList<>();
+        WebhookConfig webhookConfig4 = new WebhookConfig();
+        webhookConfig4.setSend_resolved(false);
+        webhookConfig4.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
+        webhookConfigsList4.add(webhookConfig4);
+        receiver4.setWebhook_configs(webhookConfigsList4);
+        receiverList.add(receiver4);
+    }
+
+    @NotNull
+    private List<WebhookConfig> getWebhookConfigs() {
+        List<WebhookConfig> webhookConfigsList = new ArrayList<>();
+        WebhookConfig webhookConfig = new WebhookConfig();
+        webhookConfig.setSend_resolved(true);
+        webhookConfig.setUrl("http://tkeel-alarm." + PodNamespace + ".svc:31239/webhook/demo");
+        webhookConfigsList.add(webhookConfig);
+        return webhookConfigsList;
+    }
+
+    private static void UpdateSecret(String secretName, AlertEntity alertEntity) {
+
+        File dumpFile = new File(System.getProperty("user.dir") + "/alertmanager.yaml");
+        try {
+            Yaml.dump(alertEntity, dumpFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        byte[] data = encryptToBase64(System.getProperty("user.dir") + "/alertmanager.yaml");
+
+        ApiResponse<V1Status> apiResponse = null;
 
         V1Secret v1Secret = new V1Secret();
         v1Secret.setApiVersion("v1");
@@ -630,151 +820,9 @@ public class RuleServiceImpl implements RuleService {
         v1Secret.setMetadata(v1ObjectMeta);
         v1Secret.setType("Opaque");
 
-        Route route = new Route();
-        route.setReceiver("default");
-        route.setGroup_wait("5s");
-        route.setGroup_interval("5s");
-        route.setRepeat_interval("5s");
-        route.setGroup_by(new String[]{"ruleId"});
-
-        Receiver receiver1 = new Receiver();
-        receiver1.setName("default");
-        List<WebhookConfig> webhookConfigsList = new ArrayList<>();
-        WebhookConfig webhookConfig = new WebhookConfig();
-        webhookConfig.setSend_resolved(true);
-        webhookConfig.setUrl("http://tkeel-alarm." + PodNamespace + ".svc:31239/webhook/demo");
-        webhookConfigsList.add(webhookConfig);
-
-        Receiver receiver2 = new Receiver();
-        receiver2.setName("prometheus");
-        List<WebhookConfig> webhookConfigsList2 = new ArrayList<>();
-        WebhookConfig webhookConfig2 = new WebhookConfig();
-        webhookConfig2.setSend_resolved(true);
-        webhookConfig2.setSend_resolved(true);
-        webhookConfig2.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
-        webhookConfigsList2.add(webhookConfig2);
-        receiver2.setWebhook_configs(webhookConfigsList2);
-
-        Receiver receiver3 = new Receiver();
-        receiver3.setName("event");
-        List<WebhookConfig> webhookConfigsList3 = new ArrayList<>();
-        WebhookConfig webhookConfig3 = new WebhookConfig();
-        webhookConfig3.setSend_resolved(false);
-        webhookConfig3.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
-        webhookConfigsList3.add(webhookConfig3);
-        receiver3.setWebhook_configs(webhookConfigsList3);
-
-
-        Receiver receiver4 = new Receiver();
-        receiver4.setName("auditing");
-        List<WebhookConfig> webhookConfigsList4 = new ArrayList<>();
-        WebhookConfig webhookConfig4 = new WebhookConfig();
-        webhookConfig4.setSend_resolved(false);
-        webhookConfig4.setUrl("http://notification-manager-svc.kubesphere-monitoring-system.svc:19093/api/v2/alerts");
-        webhookConfigsList4.add(webhookConfig4);
-        receiver4.setWebhook_configs(webhookConfigsList4);
-
-        List<Receiver> receiverList = new ArrayList<>();
-        List<Routes> routesList = new ArrayList<>();
-
-        receiverList.add(receiver1);
-        receiverList.add(receiver2);
-        receiverList.add(receiver3);
-        receiverList.add(receiver4);
-
-        Receiver receiver_webhook = new Receiver();
-        receiver_webhook.setName("webhook");
-        receiver_webhook.setWebhook_configs(webhookConfigsList);
-
-        for (Rule rule : ruleList) {
-            Routes routes = new Routes();
-            List<Long> noticeIds = getNoticeId(rule.getNoticeId());
-            //获取所有启用规则的通知列表
-            List<EmailAddressVo> noticeGroups = mailMapper.queryEmailAddress(noticeIds);
-            if (noticeGroups == null) {
-                System.out.println("setAlertManagerSecret emailList == null");
-                continue;
-            }
-            routes.setReceiver(String.valueOf(rule.getRuleId()));
-//            routes.setGroup_by(new String[]{"ruleId"});
-            Map<String, String> match_map = new HashMap<>();
-//            match_map.put("alerttype",".*");
-            match_map.put("tenantId", rule.getTenantId());
-            match_map.put("ruleId", String.valueOf(rule.getRuleId()));
-            routes.setMatch(match_map);
-
-            Routes prometheusRoutes = new Routes();
-            Routes eventRoutes = new Routes();
-            Routes auditingRoutes = new Routes();
-            Map<String, String> prometheus_map = new HashMap<>();
-            Map<String, String> event_map = new HashMap<>();
-            Map<String, String> auditing_map = new HashMap<>();
-            prometheus_map.put("alerttype", ".*");
-            event_map.put("alerttype", "event");
-            auditing_map.put("alerttype", "auditing");
-
-            prometheusRoutes.setReceiver("prometheus");
-            prometheusRoutes.setMatch_re(prometheus_map);
-//        prometheusRoutes.setContinueText(false);
-
-            eventRoutes.setReceiver("event");
-            eventRoutes.setMatch(event_map);
-//        eventRoutes.setContinueText(false);
-            eventRoutes.setGroup_interval("30s");
-
-            auditingRoutes.setReceiver("auditing");
-            auditingRoutes.setMatch(auditing_map);
-//        auditingRoutes.setContinueText(false);
-            auditingRoutes.setGroup_interval("30s");
-
-            routesList.add(routes);
-            routesList.add(prometheusRoutes);
-            routesList.add(eventRoutes);
-            routesList.add(auditingRoutes);
-            route.setRoutes(routesList);
-
-            Receiver receiver = new Receiver();
-            receiver.setName(String.valueOf(rule.getRuleId()));
-
-            List<EmailConfig> emailConfigList = new ArrayList<>();
-            EmailConfig emailConfig = new EmailConfig();
-            StringBuffer stringBuffer = new StringBuffer();
-            for (EmailAddressVo notice : noticeGroups) {
-                if (rule.getNoticeId().contains(notice.getNoticeId().toString())) {
-                    stringBuffer.append(notice.getEmailAddress());
-                    stringBuffer.append(",");
-                }
-            }
-            emailConfig.setTo(stringBuffer.deleteCharAt(stringBuffer.length() - 1).toString());
-            emailConfig.setSend_resolved(true);
-            emailConfigList.add(emailConfig);
-            receiver.setEmail_configs(emailConfigList);
-            receiver.setWebhook_configs(webhookConfigsList);
-
-            receiverList.add(receiver);
-        }
         Map<String, byte[]> map = new HashMap<>();
-
-        // 设置平台通知默认参数
-//        if(route.getRoutes() == null) {
-//            route.setRoutes(setRoutesConfig());
-//        }
-        AlertEntity alertEntity = new AlertEntity();
-        alertEntity.setGlobal(global);
-        alertEntity.setRoute(route);
-        alertEntity.setReceivers(receiverList);
-
-        File dumpFile = new File(System.getProperty("user.dir") + "/alertmanager.yaml");
-        try {
-            Yaml.dump(alertEntity, dumpFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        byte[] be = encryptToBase64(System.getProperty("user.dir") + "/alertmanager.yaml");
-        map.put("alertmanager.yaml", be);
-
+        map.put("alertmanager.yaml", data);
         v1Secret.setData(map);
-        ApiResponse<V1Status> apiResponse = null;
 
         try {
             ApiClient client = Config.defaultClient();
@@ -788,9 +836,8 @@ public class RuleServiceImpl implements RuleService {
         } catch (IOException io) {
             io.printStackTrace();
         }
-        //遍历所有规则
-        return 1;
     }
+
 
     /**
      * 从字符串中解析并转化为NoticeId

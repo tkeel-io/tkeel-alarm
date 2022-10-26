@@ -73,6 +73,7 @@ public class WebHookController {
                 }
                 alarmService.createAlarmEvent(entry.getValue());
             }
+            System.out.println("alarmEventMap.size() ========= " +alarmEventMap.entrySet().size());
         }else {
             System.out.println("result.getStatus() ========= " +result.getStatus());
         }
