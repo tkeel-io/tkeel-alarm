@@ -32,22 +32,6 @@ public class WebHookController {
     public void demo(@RequestBody Result result){
         System.out.println(JSON.toJSONString("result===="+result));
 
-//        "result====Result(status=firing, receiver=10152, alerts=[" +
-//                "Alert(" +
-//                "   labels=Labels(alertname=GGGGGG, " +
-//                "   ruleId=10152, instance=10.233.83.14:6789, " +
-//                "   job=core, model=null, status=紧急告警, " +
-//                "   team=null, tenantId=H18fhe6d, " +
-//                "   telemetry_id=fire_confidence, " +
-//                "   objectId=null, alarmType=0, " +
-//                "   alarmStrategy=0, alarmSource=1, alarmLevel=1, alarmValue=3.767499993244807), " +
-//                "annotations=Annotations(description=置信度（火焰）>-10, summary=null), " +
-//                "startsAt=2022-10-27T02:12:17.028Z, " +
-//                "endsAt=0001-01-01T00:00:00Z, " +
-//                "generatorURL=http://prometheus-k8s-0:9090/graph?g0.expr=avg_over_time%28entity_telemetry%7Btelemetry_id%3D%22fire_confidence%22%2Ctemplate_id%3D%22iotd-5dfc8ca9-01b1-463a-b60c-5df5f6c7cc81%22%2Ctenant_id%3D%22H18fhe6d%22%7D%5B1m%5D%29+%3E+-10&g0.tab=1, " +
-//                "status=firing, receivers=null, fingerprint=feddc0016190b64a)" +
-//                "])"
-
         System.out.println(JSON.toJSONString("firing===="+result.getStatus()));
         if (result.getStatus() != null && result.getStatus().equals("firing")) {
             List<Alert> alertList = result.getAlerts();
@@ -100,12 +84,6 @@ public class WebHookController {
                 alarmService.createAlarmEvent(entry.getValue());
             }
             System.out.println("alarmEventMap.size() ========= " +alarmEventMap.entrySet().size());
-
-
-            alarmEventMap.size() ========= 0
-
-
-
         }else {
             System.out.println("result.getStatus() ========= " +result.getStatus());
         }
