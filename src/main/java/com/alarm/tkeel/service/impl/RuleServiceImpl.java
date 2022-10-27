@@ -653,7 +653,7 @@ public class RuleServiceImpl implements RuleService {
         }
 
         Route route = new Route();
-        route.setReceiver("default-receiver");
+        route.setReceiver("default");
         route.setGroup_wait("5s");
         route.setGroup_interval("5s");
         route.setRepeat_interval("5s");
@@ -711,7 +711,8 @@ public class RuleServiceImpl implements RuleService {
 //        webhookConfig.setUrl("http://tkeel-alarm." + PodNamespace + ".svc:31239/webhook/demo");
 //        webhookConfigsList.add(webhookConfig);
 //        receiver1.setWebhook_configs(webhookConfigsList);
-//        receiverList.add(receiver1);
+//        receiver1.setWebhook_configs(getWebhookConfigs());
+        receiverList.add(receiver1);
 
         for (Rule rule : ruleList) {
             Receiver receiver = new Receiver();
