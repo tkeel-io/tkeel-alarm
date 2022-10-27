@@ -636,9 +636,8 @@ public class RuleServiceImpl implements RuleService {
 
     private void UpdateEntityRoute(AlertEntity alertEntity, List<Rule> ruleList) {
         List<Routes> routesList = new ArrayList<>();
-        //Kubesphere config
-        UpdateKubesphereRoute(routesList);
 
+        //tKeel config
         for (Rule rule : ruleList) {
             Routes routes = new Routes();
             routes.setReceiver(rule.getRuleId().toString());
@@ -651,6 +650,8 @@ public class RuleServiceImpl implements RuleService {
 
             routesList.add(routes);
         }
+        //Kubesphere config
+        UpdateKubesphereRoute(routesList);
 
         Route route = new Route();
         route.setReceiver("default");
@@ -662,6 +663,8 @@ public class RuleServiceImpl implements RuleService {
 //        route.setGroup_wait("30s");
         route.setGroup_by(new String[]{"ruleId"});
         route.setRoutes(routesList);
+
+
         alertEntity.setRoute(route);
 
     }
