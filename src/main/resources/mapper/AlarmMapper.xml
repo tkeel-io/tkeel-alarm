@@ -54,21 +54,21 @@
         insert into tkeel_alarm_record(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
         values
             (
-            #{alarmRecords.recordHash},
-            #{alarmRecords.ruleId},
-            #{alarmRecords.tenantId},
-            #{alarmRecords.alarmName},
-            #{alarmRecords.alarmLevel},
-            #{alarmRecords.alarmStrategy},
-            #{alarmRecords.alarmSource},
-            #{alarmRecords.alarmType},
-            #{alarmRecords.objectId},
-            #{alarmRecords.telemetryId},
-            #{alarmRecords.startTime},
-            #{alarmRecords.alarmStatus},
-            #{alarmRecords.alarmValue},
-            #{alarmRecords.alarmDesc},
-            #{alarmRecords.deleted})
+            #{recordHash},
+            #{ruleId},
+            #{tenantId},
+            #{alarmName},
+            #{alarmLevel},
+            #{alarmStrategy},
+            #{alarmSource},
+            #{alarmType},
+            #{objectId},
+            #{telemetryId},
+            #{startTime},
+            #{alarmStatus},
+            #{alarmValue},
+            #{alarmDesc},
+            #{deleted})
         returing alarm_id
     </select>
 
@@ -101,23 +101,23 @@
         insert into
         tkeel_alarm_event(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
         values
-        <foreach collection="list" item="alarmRecords" index="index" separator=",">
+        <foreach collection="list" item="items" index="index" separator=",">
             (
-            #{alarmRecords.recordHash},
-            #{alarmRecords.ruleId},
-            #{alarmRecords.tenantId},
-            #{alarmRecords.alarmName},
-            #{alarmRecords.alarmLevel},
-            #{alarmRecords.alarmStrategy},
-            #{alarmRecords.alarmSource},
-            #{alarmRecords.alarmType},
-            #{alarmRecords.objectId},
-            #{alarmRecords.telemetryId},
-            #{alarmRecords.startTime},
-            #{alarmRecords.alarmStatus},
-            #{alarmRecords.alarmValue},
-            #{alarmRecords.alarmDesc},
-            #{alarmRecords.deleted})
+            #{items.recordHash},
+            #{items.ruleId},
+            #{items.tenantId},
+            #{items.alarmName},
+            #{items.alarmLevel},
+            #{items.alarmStrategy},
+            #{items.alarmSource},
+            #{items.alarmType},
+            #{items.objectId},
+            #{items.telemetryId},
+            #{items.startTime},
+            #{items.alarmStatus},
+            #{items.alarmValue},
+            #{items.alarmDesc},
+            #{items.deleted})
         </foreach>
     </insert>
 
