@@ -50,7 +50,7 @@
     </update>
 
 
-    <select id="createAlarmRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord" resultType="long">
+    <insert id="createAlarmRecord" parameterType="com.alarm.tkeel.pojo.AlarmRecord">
         insert into tkeel_alarm_record(record_hash,rule_id,tenant_id,alarm_name,alarm_level,alarm_strategy,alarm_source,alarm_type,object_id,telemetry_id,start_time,alarm_status,alarm_value,alarm_desc,deleted)
         values
             (
@@ -69,8 +69,7 @@
             #{alarmValue},
             #{alarmDesc},
             #{deleted})
-        returing alarm_id
-    </select>
+    </insert>
 
     <select id="queryAlarmCount" resultType="com.alarm.tkeel.pojo.alerts.MetricCount">
         SELECT tenant_id,COUNT(0) as `count`
