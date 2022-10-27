@@ -21,7 +21,8 @@ public class Labels implements Serializable {
 //    private String deviceId;
     private String tenantId;
     private String telemetry_id;
-    private String objectId;
+    //    private String objectId;
+    private String entity_id;
     private Integer alarmType;
     private Integer alarmStrategy;
     private Integer alarmSource;
