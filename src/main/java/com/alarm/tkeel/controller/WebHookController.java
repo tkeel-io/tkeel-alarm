@@ -81,7 +81,7 @@ public class WebHookController {
                 if (alarmService.countPendingRecord(alarmRecord) == 0) {
                     Long id = alarmService.createAlarmRecord(alarmRecord);
                 }
-                alarmService.createAlarmEvent(entry.getValue());
+                //alarmService.createAlarmEvent(entry.getValue());
             }
             System.out.println("alarmEventMap.size() ========= " + alarmEventMap.entrySet().size());
         } else {

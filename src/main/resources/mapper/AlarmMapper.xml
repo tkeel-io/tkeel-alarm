@@ -129,7 +129,7 @@
                 </if>
             </trim>
         </set>
-        where alarm_id = 0 and record_hash = #{recordHash}
+        where (alarm_id = 0 or alarm_id IS NULL) and record_hash = #{recordHash}
     </update>
 
 </mapper>
