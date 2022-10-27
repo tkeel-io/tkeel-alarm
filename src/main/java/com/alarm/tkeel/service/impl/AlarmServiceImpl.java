@@ -50,6 +50,13 @@ public class AlarmServiceImpl implements AlarmService {
             enableParamVo.setEnable(0);
             enableParamVo.setRuleId(alarmHandle.getRuleId());
             ruleService.setEnable(enableParamVo);
+            // @TODO 将未关联的告警事件与告警记录关联。
+            // 1. 查询Alarm
+            // AlarmRecord alarmRecord = alarmMapper.getAlarmRecord(alarmHandle.getAlarmId());
+            // 2. 更新所有未关联的告警事件
+            //if (alarmRecord != null) {
+            //    alarmMapper.updateAlarmEventAlarmID(alarmRecord);
+            //}
         }
         return code;
     }

@@ -23,4 +23,7 @@ public interface AlarmMapper {
     List<MetricCount> queryAlarmCount();
 
     List<MetricCount> queryAlarmLevel();
+
+    // @TODO 增加Alarm查询能力
+    //AlarmRecord getAlarmRecord(Long alarmId);
 }
