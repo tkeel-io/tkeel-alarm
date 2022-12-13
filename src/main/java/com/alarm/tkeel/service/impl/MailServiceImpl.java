@@ -6,7 +6,6 @@ import com.alarm.tkeel.service.MailService;
 import com.alarm.tkeel.utils.PageInfo;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -32,7 +31,7 @@ public class MailServiceImpl implements MailService {
         }else {
             try {
                 int code = mailMapper.updateMailConfig(email);
-                int config = ruleService.setAlertManagerSecret();
+                int config = ruleService.updateAlertManagerSecret();
                 if(config == 0){
                     System.out.println("更新alertmanager通知配置失败！");
                 }
@@ -105,7 +104,7 @@ public class MailServiceImpl implements MailService {
         int code = mailMapper.updateEmailAddress(emailAddressVo);
         try {
             //删除邮箱配置后需要，更新alertmanager的通知配置
-            int config = ruleService.setAlertManagerSecret();
+            int config = ruleService.updateAlertManagerSecret();
             if (config == 0) {
                 System.out.println("更新alertmanager通知配置失败！");
             }

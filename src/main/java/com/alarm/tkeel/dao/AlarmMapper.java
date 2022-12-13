@@ -10,13 +10,20 @@ public interface AlarmMapper {
 
     List<AlarmRecord> queryAlarmRecord(AlarmRecordParamVo alarmRecordParamVo);
 
-    int countPendingRecord(AlarmRecord alarmRecord);
+    Long countPendingRecord(AlarmRecord alarmRecord);
 
     int updateAlarmHandleOpinions(AlarmHandle alarmHandle);
 
-    int createAlarmRecord(List<AlarmRecord> alarmRecord);
+    Long createAlarmRecord(AlarmRecord alarmRecord);
+
+    Long createAlarmEvent(List<AlarmRecord> alarmRecord);
+
+    int updateAlarmEventAlarmID(AlarmRecord alarmRecord);
 
     List<MetricCount> queryAlarmCount();
 
     List<MetricCount> queryAlarmLevel();
+
+    // @TODO 增加Alarm查询能力
+    //AlarmRecord getAlarmRecord(Long alarmId);
 }
