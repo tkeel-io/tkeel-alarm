@@ -40,10 +40,10 @@ public class AlarmServiceImpl implements AlarmService {
         int code = alarmMapper.updateAlarmHandleOpinions(alarmHandle);
         if(code > 0) {
             // 告警记录被处理后则停用规则对应的规则。
-            EnableParamVo enableParamVo = new EnableParamVo();
-            enableParamVo.setEnable(0);
-            enableParamVo.setRuleId(alarmHandle.getRuleId());
-            ruleService.setEnable(enableParamVo);
+            //EnableParamVo enableParamVo = new EnableParamVo();
+            //enableParamVo.setEnable(0);
+            //enableParamVo.setRuleId(alarmHandle.getRuleId());
+            //ruleService.setEnable(enableParamVo);
         }
         return code;
     }
