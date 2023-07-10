@@ -38,7 +38,7 @@ public class K8SServiceImpl implements K8SService {
         }
         Global global = new Global();
         global.setResolve_timeout("5m");
-        global.setSmtp_smarthost(email.getSmtpAddress());
+        global.setSmtp_smarthost(email.getSmtpAddress() + ":" + email.getPort());
         global.setSmtp_auth_username(email.getSmtpUserName());
         global.setSmtp_auth_password(email.getSmtpPassWord());
         global.setSmtp_from(email.getFromAddress());
